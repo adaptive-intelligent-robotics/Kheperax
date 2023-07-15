@@ -18,6 +18,7 @@ class Maze:
         if segments_list is None:
             segments_list = []
 
+        # add borders
         segments_list.append(Segment(Pos(0, 0), Pos(0, 1)))
         segments_list.append(Segment(Pos(0, 1), Pos(1, 1)))
         segments_list.append(Segment(Pos(1, 1), Pos(1, 0)))

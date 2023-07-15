@@ -9,6 +9,7 @@ import functools
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
+from kheperax.maze import Maze
 
 from qdax.core.containers.mapelites_repertoire import compute_euclidean_centroids
 from qdax.core.emitters.mutation_operators import isoline_variation
@@ -36,15 +37,20 @@ def run_me() -> None:
     random_key = jax.random.PRNGKey(seed)
     random_key, subkey = jax.random.split(random_key)
 
+    # Define Task configuration
+    config_kheperax = KheperaxConfig.get_default()
+
+    # Example of modification of the robots attributes (same thing could be done with the maze)
+    config_kheperax.robot = config_kheperax.robot.replace(lasers_return_minus_one_if_out_of_range=True)
+
+    # Create Kheperax Task.
     (
         env,
         policy_network,
         scoring_fn,
     ) = KheperaxTask.create_default_task(
-        KheperaxConfig.get_default(),
+        config_kheperax,
         random_key=subkey,
-        episode_length=episode_length,
-        mlp_policy_hidden_layer_sizes=mlp_policy_hidden_layer_sizes,
     )
 
     # initialising first variables for Map-Elites init

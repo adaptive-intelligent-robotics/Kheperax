@@ -18,8 +18,6 @@ def example_usage_render():
     env, policy_network, scoring_fn = KheperaxTask.create_default_task(
         kheperax_config=task_config,
         random_key=subkey,
-        episode_length=1000,
-        mlp_policy_hidden_layer_sizes=(8,),
     )
 
     random_key, subkey = jax.random.split(subkey)

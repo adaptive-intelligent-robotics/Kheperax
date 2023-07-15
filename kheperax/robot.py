@@ -8,7 +8,8 @@ import jax.tree_util
 from jax import numpy as jnp
 
 
-from kheperax.geoms import Laser, Pos, Disk, Segment
+from kheperax.geoms import Pos, Disk, Segment
+from kheperax.laser import Laser
 from kheperax.maze import Maze
 from kheperax.posture import Posture
 from kheperax.tree_utils import get_batch_size

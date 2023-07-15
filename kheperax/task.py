@@ -23,15 +23,19 @@ from kheperax.type_fixer_wrapper import TypeFixerWrapper
 
 @dataclasses.dataclass
 class KheperaxConfig:
-    resolution: Tuple[int, int]
+    episode_length: int
+    mlp_policy_hidden_layer_sizes: Tuple[int, ...]
     action_scale: float
     maze: Maze
     robot: Robot
     std_noise_wheel_velocities: float
+    resolution: Tuple[int, int]
 
     @classmethod
     def get_default(cls):
         return cls(
+            episode_length=250,
+            mlp_policy_hidden_layer_sizes=(8,),
             resolution=(64, 64),
             action_scale=0.025,
             maze=Maze.create_default_maze(),
@@ -64,15 +68,13 @@ class KheperaxTask(brax.envs.env.Env):
     def create_default_task(cls,
                             kheperax_config: KheperaxConfig,
                             random_key,
-                            episode_length: int = 250,
-                            mlp_policy_hidden_layer_sizes: Tuple[int, ...] = (8,),
                             ):
         env = cls(kheperax_config)
-        env = brax.envs.wrappers.EpisodeWrapper(env, episode_length, action_repeat=1)
+        env = brax.envs.wrappers.EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
         env = TypeFixerWrapper(env)
 
         # Init policy network
-        policy_layer_sizes = mlp_policy_hidden_layer_sizes + (env.action_size,)
+        policy_layer_sizes = kheperax_config.mlp_policy_hidden_layer_sizes + (env.action_size,)
         policy_network = MLP(
             layer_sizes=policy_layer_sizes,
             kernel_init=jax.nn.initializers.lecun_uniform(),
@@ -86,7 +88,7 @@ class KheperaxTask(brax.envs.env.Env):
             policy_network,
             bd_extraction_fn,
             random_key,
-            episode_length=episode_length,
+            episode_length=kheperax_config.episode_length,
         )
 
         return env, policy_network, scoring_fn
