@@ -26,15 +26,19 @@ def example_usage_render():
     print(init_state.obs)
 
     img = env.render(init_state)
+    print(img.shape)
+    print(img)
 
     plt.imshow(img, origin='lower')
     plt.xticks([])
     plt.yticks([])
 
-    file_name = 'maze.png'
+    file_name = 'results/maze.png'
     plt.savefig(file_name)
     print("Saved file:", file_name)
 
 
 if __name__ == '__main__':
+    # matplotlib backend agg for headless mode
+    plt.switch_backend("agg")
     example_usage_render()

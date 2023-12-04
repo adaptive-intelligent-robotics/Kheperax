@@ -39,6 +39,8 @@ def run_me() -> None:
 
     # Define Task configuration
     config_kheperax = KheperaxConfig.get_default()
+    config_kheperax.episode_length = episode_length
+    config_kheperax.mlp_policy_hidden_layer_sizes = mlp_policy_hidden_layer_sizes
 
     # Example of modification of the robots attributes (same thing could be done with the maze)
     config_kheperax.robot = config_kheperax.robot.replace(lasers_return_minus_one_if_out_of_range=True)
@@ -120,9 +122,11 @@ def run_me() -> None:
         # vmin=-0.2,
         # vmax=0.0,
     )
-
+    plt.savefig("results/repertoire.png")
     plt.show()
-
+        
 
 if __name__ == "__main__":
+    # matplotlib backend agg for headless mode
+    plt.switch_backend("agg")
     run_me()
