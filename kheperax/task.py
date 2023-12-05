@@ -188,6 +188,10 @@ class KheperaxTask(brax.envs.env.Env):
     @property
     def state_descriptor_length(self) -> int:
         return 2
+    
+    @property
+    def behavior_descriptor_length(self) -> int:
+        return 2
 
     @property
     def behavior_descriptor_limits(self) -> Tuple[List[float], List[float]]:
