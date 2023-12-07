@@ -16,6 +16,7 @@ from kheperax.rendering_tools import RenderingTools
 from kheperax.robot import Robot
 from kheperax.type_fixer_wrapper import TypeFixerWrapper
 
+from kheperax.maps import KHERPERAX_MAZES
 
 @dataclasses.dataclass
 class TargetKheperaxConfig(KheperaxConfig):
@@ -24,16 +25,23 @@ class TargetKheperaxConfig(KheperaxConfig):
 
     @classmethod
     def get_default(cls):
+        return cls.get_map("standard")
+    
+    @classmethod
+    def get_map(cls, map_name):
+        map = KHERPERAX_MAZES[map_name]
         return cls(
             episode_length=1000,
             mlp_policy_hidden_layer_sizes=(8,),
-            resolution=(1024, 1024),
+            resolution=(128, 128),
             action_scale=0.025,
-            maze=Maze.create_default_maze(),
+            maze=Maze.create(
+                segments_list=map["segments"]
+            ),
             robot=Robot.create_default_robot(),
             std_noise_wheel_velocities=0.0,
-            target_pos=(0.15, 0.9),
-            target_radius=0.05,
+            target_pos=map["target_pos"],
+            target_radius=map["target_radius"],
         )
 
 class TargetKheperaxTask(KheperaxTask):
@@ -42,6 +50,7 @@ class TargetKheperaxTask(KheperaxTask):
                             kheperax_config: KheperaxConfig,
                             random_key,
                             ):
+
         env = cls(kheperax_config)
         print(type(env))
         env = brax.envs.wrappers.EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
@@ -66,6 +75,7 @@ class TargetKheperaxTask(KheperaxTask):
         )
 
         return env, policy_network, scoring_fn
+    
 
     def step(self, state: KheperaxState, action: jnp.ndarray) -> KheperaxState:
         random_key = state.random_key

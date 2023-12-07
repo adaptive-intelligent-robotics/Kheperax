@@ -19,7 +19,7 @@ def example_usage_gif():
     random_key, subkey = jax.random.split(random_key)
 
     task_config = KheperaxConfig.get_default()
-    task_config.resolution = (1024, 1024)
+    task_config.resolution = (128, 128)
 
     env, policy_network, scoring_fn = KheperaxTask.create_default_task(
         kheperax_config=task_config,

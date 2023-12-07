@@ -22,15 +22,18 @@ from qdax.utils.metrics import default_qd_metrics
 from qdax.utils.plotting import plot_2d_map_elites_repertoire, plot_map_elites_results
 
 # from kheperax.task import KheperaxTask, KheperaxConfig
-from kheperax.target import TargetKheperaxConfig, TargetKheperaxTask
+from kheperax.final_distance import FinalDistKheperaxTask
+from kheperax.target import TargetKheperaxConfig
 
 def run_me(map_name='standard') -> None:
     print(f"Running ME on {map_name}")
+
     seed = 42
     batch_size = 2048
     num_evaluations = int(1e6)
     num_iterations = num_evaluations // batch_size
     grid_shape = (50, 50)
+    episode_length = 250
     mlp_policy_hidden_layer_sizes = (8,)
 
     iso_sigma = 0.2
@@ -42,9 +45,8 @@ def run_me(map_name='standard') -> None:
 
     # Define Task configuration
     config_kheperax = TargetKheperaxConfig.get_map(map_name)
+    config_kheperax.episode_length = episode_length
     config_kheperax.mlp_policy_hidden_layer_sizes = mlp_policy_hidden_layer_sizes
-
-    episode_length = config_kheperax.episode_length
 
     # Example of modification of the robots attributes (same thing could be done with the maze)
     config_kheperax.robot = config_kheperax.robot.replace(lasers_return_minus_one_if_out_of_range=True)
@@ -54,7 +56,7 @@ def run_me(map_name='standard') -> None:
         env,
         policy_network,
         scoring_fn,
-    ) = TargetKheperaxTask.create_default_task(
+    ) = FinalDistKheperaxTask.create_default_task(
         config_kheperax,
         random_key=subkey,
     )
@@ -82,7 +84,7 @@ def run_me(map_name='standard') -> None:
     )
 
     # Define a metrics function
-    qd_offset = episode_length * jnp.sqrt(2)
+    qd_offset = jnp.sqrt(2)*100 + episode_length
     metrics_fn = functools.partial(
         default_qd_metrics,
         qd_offset=qd_offset,
@@ -132,7 +134,7 @@ def run_me(map_name='standard') -> None:
         # vmin=-0.2,
         # vmax=0.0,
     )
-    plt.savefig("results/target_repertoire.png")
+    plt.savefig("results/final_dist_repertoire.png")
     # plt.show()
 
     env_steps = jnp.arange(1, num_iterations + 1) * batch_size * episode_length
@@ -144,9 +146,9 @@ def run_me(map_name='standard') -> None:
         max_bd=max_bd,
     )
     # Make big title
-    plt.suptitle("Map-Elites in Target-based Kheperax", y=0.9, fontsize=20)
+    plt.suptitle("Map-Elites in Final-Distance Kheperax", y=0.9, fontsize=20)
 
-    plt.savefig("results/ME_stats.png")
+    plt.savefig("results/final_distME_stats.png")
 
     # Record gif
     elite_index = jnp.argmax(repertoire.fitnesses)
@@ -179,10 +181,13 @@ def run_me(map_name='standard') -> None:
     import imageio
     fps = 30
     duration = 1000/fps
-    imageio.mimsave("results/target_policy.gif", rollout, duration=duration)
+    imageio.mimsave("results/final_dist.gif", rollout, duration=duration)
         
+
 # map_name='standard'
-map_name='pointmaze'
+# map_name='pointmaze'
+map_name='snake'
+
 
 if __name__ == "__main__":
     # matplotlib backend agg for headless mode
