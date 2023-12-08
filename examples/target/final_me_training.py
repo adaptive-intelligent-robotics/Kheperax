@@ -24,6 +24,7 @@ from qdax.utils.plotting import plot_2d_map_elites_repertoire, plot_map_elites_r
 # from kheperax.task import KheperaxTask, KheperaxConfig
 from kheperax.final_distance import FinalDistKheperaxTask
 from kheperax.target import TargetKheperaxConfig
+from kheperax.quad_task import QuadKheperaxConfig
 
 def run_me(map_name='standard') -> None:
     print(f"Running ME on {map_name}")
@@ -44,7 +45,11 @@ def run_me(map_name='standard') -> None:
     random_key, subkey = jax.random.split(random_key)
 
     # Define Task configuration
-    config_kheperax = TargetKheperaxConfig.get_map(map_name)
+    if "quad_" in map_name:
+        base_map_name = map_name.replace("quad_", "")
+        config_kheperax = QuadKheperaxConfig.get_map(base_map_name)
+    else:
+        config_kheperax = TargetKheperaxConfig.get_map(map_name)
     config_kheperax.episode_length = episode_length
     config_kheperax.mlp_policy_hidden_layer_sizes = mlp_policy_hidden_layer_sizes
 
@@ -184,12 +189,14 @@ def run_me(map_name='standard') -> None:
     imageio.mimsave("results/final_dist.gif", rollout, duration=duration)
         
 
-# map_name='standard'
+map_name='standard'
 # map_name='pointmaze'
-map_name='snake'
+# map_name='snake'
 
+quad=True
 
 if __name__ == "__main__":
     # matplotlib backend agg for headless mode
     plt.switch_backend("agg")
+    map_name = ("quad_" if quad else "") + map_name
     run_me(map_name)

@@ -30,6 +30,7 @@ class KheperaxConfig:
     robot: Robot
     std_noise_wheel_velocities: float
     resolution: Tuple[int, int]
+    limits: Tuple[List[float], List[float]]
 
     @classmethod
     def get_default(cls):
@@ -41,6 +42,7 @@ class KheperaxConfig:
             maze=Maze.create_default_maze(),
             robot=Robot.create_default_robot(),
             std_noise_wheel_velocities=0.0,
+            limits=([0., 0.], [1., 1.])
         )
 
 
@@ -195,7 +197,7 @@ class KheperaxTask(brax.envs.env.Env):
 
     @property
     def behavior_descriptor_limits(self) -> Tuple[List[float], List[float]]:
-        return [0., 0.], [1., 1.]
+        return self.kheperax_config.limits
 
     @property
     def backend(self) -> str:

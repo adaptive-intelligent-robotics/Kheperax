@@ -42,6 +42,7 @@ class TargetKheperaxConfig(KheperaxConfig):
             std_noise_wheel_velocities=0.0,
             target_pos=map["target_pos"],
             target_radius=map["target_radius"],
+            limits=([0., 0.], [1., 1.])
         )
 
 class TargetKheperaxTask(KheperaxTask):
@@ -123,28 +124,34 @@ class TargetKheperaxTask(KheperaxTask):
         # WARNING: only consider the maze is in the unit square
         coeff_triangle = 3.
         image = jnp.zeros(self.kheperax_config.resolution, dtype=jnp.float32)
-        image = RenderingTools.place_triangle(image,
-                                              point_1=(
-                                                  state.robot.posture.x + coeff_triangle * state.robot.radius * jnp.cos(
-                                                      state.robot.posture.angle),
-                                                  state.robot.posture.y + coeff_triangle * state.robot.radius * jnp.sin(
-                                                      state.robot.posture.angle)),
-                                              point_2=(state.robot.posture.x + state.robot.radius * jnp.cos(
-                                                  state.robot.posture.angle - jnp.pi / 2),
-                                                       state.robot.posture.y + state.robot.radius * jnp.sin(
-                                                           state.robot.posture.angle - jnp.pi / 2)),
-                                              point_3=(state.robot.posture.x + state.robot.radius * jnp.cos(
-                                                  state.robot.posture.angle + jnp.pi / 2),
-                                                       state.robot.posture.y + state.robot.radius * jnp.sin(
-                                                           state.robot.posture.angle + jnp.pi / 2)),
-                                              value=2.)
+        image = RenderingTools.place_triangle(
+            self.kheperax_config,
+            image,
+            point_1=(
+                state.robot.posture.x + coeff_triangle * state.robot.radius * jnp.cos(
+                    state.robot.posture.angle),
+                state.robot.posture.y + coeff_triangle * state.robot.radius * jnp.sin(
+                    state.robot.posture.angle)),
+            point_2=(state.robot.posture.x + state.robot.radius * jnp.cos(
+                state.robot.posture.angle - jnp.pi / 2),
+                    state.robot.posture.y + state.robot.radius * jnp.sin(
+                        state.robot.posture.angle - jnp.pi / 2)),
+            point_3=(state.robot.posture.x + state.robot.radius * jnp.cos(
+                state.robot.posture.angle + jnp.pi / 2),
+                    state.robot.posture.y + state.robot.radius * jnp.sin(
+                        state.robot.posture.angle + jnp.pi / 2)),
+            value=2.)
 
-        image = RenderingTools.place_circle(image,
+        image = RenderingTools.place_circle(
+                                            self.kheperax_config,
+                                            image,
                                             center=(state.robot.posture.x, state.robot.posture.y),
                                             radius=state.robot.radius,
                                             value=1.)
         
-        image = RenderingTools.place_circle(image,
+        image = RenderingTools.place_circle(
+                                            self.kheperax_config,
+                                            image,
                                             center=(self.kheperax_config.target_pos[0], self.kheperax_config.target_pos[1]),
                                             radius=self.kheperax_config.target_radius,
                                             value=3.)
@@ -158,9 +165,11 @@ class TargetKheperaxTask(KheperaxTask):
         yellow = jnp.array([1., 1., 0.])
         black = jnp.array([0., 0., 0.])
 
-        image = RenderingTools.place_segments(image,
-                                              state.maze.walls,
-                                              value=5.)
+        image = RenderingTools.place_segments(
+                                            self.kheperax_config,
+                                            image,
+                                            state.maze.walls,
+                                            value=5.)
 
         index_to_color = {
             0.: white,

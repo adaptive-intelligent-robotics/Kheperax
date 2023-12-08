@@ -15,6 +15,7 @@ class Maze:
 
     @classmethod
     def create(cls, segments_list: List[Segment] = None):
+        # print("segments_list", segments_list)
         if segments_list is None:
             segments_list = []
 
@@ -23,6 +24,31 @@ class Maze:
         segments_list.append(Segment(Pos(0, 1), Pos(1, 1)))
         segments_list.append(Segment(Pos(1, 1), Pos(1, 0)))
         segments_list.append(Segment(Pos(1, 0), Pos(0, 0)))
+
+        walls = jax.tree_util.tree_map(
+            lambda *x: jnp.asarray(x, dtype=jnp.float32), *segments_list
+        )
+
+        return Maze(walls)
+    
+    @classmethod
+    def create_custom(
+            cls, 
+            limits,
+            segments_list: List[Segment] = None
+        ):
+        if segments_list is None:
+            segments_list = []
+        (min_x, min_y), (max_x, max_y) = limits
+
+        # bottom border
+        segments_list.append(Segment(Pos(min_x, min_y), Pos(max_x, min_y)))
+        # left border
+        segments_list.append(Segment(Pos(min_x, min_y), Pos(min_x, max_y)))
+        # top border
+        segments_list.append(Segment(Pos(min_x, max_y), Pos(max_x, max_y)))
+        # right border
+        segments_list.append(Segment(Pos(max_x, max_y), Pos(max_x, min_y)))
 
         walls = jax.tree_util.tree_map(
             lambda *x: jnp.asarray(x, dtype=jnp.float32), *segments_list
