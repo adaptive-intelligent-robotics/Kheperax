@@ -53,6 +53,8 @@ def run_me(map_name='standard') -> None:
     config_kheperax.episode_length = episode_length
     config_kheperax.mlp_policy_hidden_layer_sizes = mlp_policy_hidden_layer_sizes
 
+    print(config_kheperax.resolution)
+
     # Example of modification of the robots attributes (same thing could be done with the maze)
     config_kheperax.robot = config_kheperax.robot.replace(lasers_return_minus_one_if_out_of_range=True)
 
@@ -167,13 +169,13 @@ def run_me(map_name='standard') -> None:
     state = env.reset(subkey)
 
     rollout = []
+    base_image = env.create_image(state)
 
     for _ in tqdm(range(episode_length)):
         # Render
-        image = env.render(state)
-        image = jnp.array(image*255).astype('uint8')
-        # Flip vertically
-        image = image[::-1, :, :]
+        image = env.add_robot(base_image, state)
+        image = env.add_lasers(image, state)
+        image = env.render_rgb_image(image, flip=True)
         rollout.append(image)
         
         # Update state
@@ -186,7 +188,7 @@ def run_me(map_name='standard') -> None:
     import imageio
     fps = 30
     duration = 1000/fps
-    imageio.mimsave("results/final_dist.gif", rollout, duration=duration)
+    imageio.mimsave("results/final_dist.gif", rollout, duration=duration, loop=0)
         
 
 map_name='standard'
@@ -194,6 +196,7 @@ map_name='standard'
 # map_name='snake'
 
 quad=True
+# quad=False
 
 if __name__ == "__main__":
     # matplotlib backend agg for headless mode

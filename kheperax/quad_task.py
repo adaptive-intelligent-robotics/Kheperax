@@ -3,7 +3,7 @@ import jax
 import jax.numpy as jnp
 
 from kheperax.geoms import Pos, Segment
-from kheperax.target import TargetKheperaxConfig
+from kheperax.target import TargetKheperaxConfig, DEFAULT_RESOLUTION
 from kheperax.maps import KHERPERAX_MAZES
 
 from kheperax.maze import Maze
@@ -51,7 +51,7 @@ class QuadKheperaxConfig(TargetKheperaxConfig):
         return TargetKheperaxConfig(
             episode_length=1000,
             mlp_policy_hidden_layer_sizes=(8,),
-            resolution=(256, 256),
+            resolution=DEFAULT_RESOLUTION,
             action_scale=0.025,
             maze=Maze.create_custom(
                 limits=limits,

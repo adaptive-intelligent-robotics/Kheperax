@@ -17,7 +17,7 @@ class Posture:
     def dist_to_xy(self, x: jnp.ndarray, y: jnp.ndarray) -> jnp.ndarray:
         return jnp.linalg.norm(jnp.asarray([self.x, self.y]) - jnp.asarray([x, y]))
 
-    def rotate(self, angle: angle) -> Posture:
+    def rotate(self, angle) -> Posture:
         x_ = self.x * jnp.cos(angle) - self.y * jnp.sin(angle)
         y_ = self.x * jnp.sin(angle) + self.y * jnp.cos(angle)
         theta_ = self.normalize_angle(self.angle + angle)

@@ -160,13 +160,12 @@ def run_me(map_name='standard') -> None:
     state = env.reset(subkey)
 
     rollout = []
+    base_image = env.create_image(state)
 
     for _ in tqdm(range(episode_length)):
         # Render
-        image = env.render(state)
-        image = jnp.array(image*255).astype('uint8')
-        # Flip vertically
-        image = image[::-1, :, :]
+        image = env.add_robot(base_image, state)
+        image = env.render_image(image, flip=True)
         rollout.append(image)
         
         # Update state

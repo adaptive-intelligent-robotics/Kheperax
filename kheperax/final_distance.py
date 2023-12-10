@@ -114,22 +114,6 @@ def make_final_policy_network_play_step_fn_brax(
     
     return final_play_step_fn
 
-@dataclasses.dataclass
-class FinalDistKheperaxConfig(TargetKheperaxConfig):
-
-    @classmethod
-    def get_default(cls):
-        return cls(
-            episode_length=250,
-            mlp_policy_hidden_layer_sizes=(8,),
-            resolution=(128, 128),
-            action_scale=0.025,
-            maze=Maze.create_default_maze(),
-            robot=Robot.create_default_robot(),
-            std_noise_wheel_velocities=0.0,
-            target_pos=(0.15, 0.9),
-            target_radius=0.05,
-        )
 
 class FinalDistKheperaxTask(TargetKheperaxTask):
     """Kheperax task that only rewards the final distance to the target"""
