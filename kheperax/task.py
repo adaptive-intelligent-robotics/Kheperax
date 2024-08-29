@@ -13,7 +13,7 @@ from qdax.environments.bd_extractors import (
     get_final_xy_position,
 )
 from qdax.tasks.brax_envs import create_brax_scoring_fn
-from qdax.types import RNGKey
+from qdax.custom_types import RNGKey
 
 from kheperax.maze import Maze
 from kheperax.rendering_tools import RenderingTools

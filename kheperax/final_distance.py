@@ -17,7 +17,7 @@ from qdax.tasks.brax_envs import reset_based_scoring_function_brax_envs
 from qdax.core.neuroevolution.buffers.buffer import QDTransition
 from qdax.core.neuroevolution.mdp_utils import generate_unroll
 from qdax.core.neuroevolution.networks.networks import MLP
-from qdax.types import (
+from qdax.custom_types import (
     Descriptor,
     EnvState,
     ExtraScores,
