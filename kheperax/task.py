@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 from typing import List, Tuple, Dict, Any
 
-import brax.envs
+import brax.v1.envs
 import flax.struct
 import jax.numpy as jnp
 import jax.tree_util
@@ -19,7 +19,7 @@ from kheperax.maze import Maze
 from kheperax.rendering_tools import RenderingTools
 from kheperax.robot import Robot
 from kheperax.type_fixer_wrapper import TypeFixerWrapper
-
+from brax.v1.envs import Env
 
 @dataclasses.dataclass
 class KheperaxConfig:
@@ -61,7 +61,7 @@ class KheperaxState:
     info: Dict[str, Any] = flax.struct.field(default_factory=dict)
 
 
-class KheperaxTask(brax.envs.env.Env):
+class KheperaxTask(Env):
     def __init__(self, kheperax_config: KheperaxConfig, **kwargs):
         self.kheperax_config = kheperax_config
         super().__init__(None, **kwargs)
@@ -72,7 +72,7 @@ class KheperaxTask(brax.envs.env.Env):
                             random_key,
                             ):
         env = cls(kheperax_config)
-        env = brax.envs.wrappers.EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
+        env = brax.v1.envs.wrappers.EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
         env = TypeFixerWrapper(env)
 
         # Init policy network

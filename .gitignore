@@ -10,3 +10,5 @@ venv/
 
 .vscode/
 results/*
+
+apptainer/*
