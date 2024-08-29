@@ -1,6 +1,6 @@
 import jax.numpy as jnp
 from brax.v1.envs import Wrapper
-# from brax.envs import env as brax_env
+# from brax.v1.envs import env as brax_env
 
 
 class TypeFixerWrapper(Wrapper):

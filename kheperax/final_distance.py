@@ -2,7 +2,7 @@ import functools
 import jax
 from jax import numpy as jnp
 import dataclasses
-import brax.envs
+import brax.v1.envs
 import flax.linen as nn
 from functools import partial
 from typing import Callable, Optional, Tuple
@@ -38,7 +38,7 @@ from kheperax.target import TargetKheperaxConfig, TargetKheperaxTask
 
 
 def make_final_policy_network_play_step_fn_brax(
-    env: brax.envs.Env,
+    env: brax.v1.envs.Env,
     policy_network: nn.Module,
 ) -> Callable[
     [EnvState, Params, RNGKey], Tuple[EnvState, Params, RNGKey, QDTransition]
@@ -124,7 +124,7 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
                             ):
         env = cls(kheperax_config)
         print(type(env))
-        env = brax.envs.wrappers.EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
+        env = brax.v1.envs.wrappers.EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
         env = TypeFixerWrapper(env)
 
         # Init policy network

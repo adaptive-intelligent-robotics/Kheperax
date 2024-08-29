@@ -2,7 +2,7 @@ import jax
 from jax import numpy as jnp
 import numpy as np
 import dataclasses
-import brax.envs
+import brax.v1.envs
 
 from qdax.core.neuroevolution.networks.networks import MLP
 from qdax.tasks.brax_envs import create_brax_scoring_fn
@@ -59,7 +59,7 @@ class TargetKheperaxTask(KheperaxTask):
 
         env = cls(kheperax_config)
         print(type(env))
-        env = brax.envs.wrappers.EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
+        env = brax.v1.envs.wrappers.EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
         env = TypeFixerWrapper(env)
 
         # Init policy network
