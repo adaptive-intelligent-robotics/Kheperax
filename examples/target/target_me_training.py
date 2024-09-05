@@ -165,7 +165,7 @@ def run_me(map_name='standard') -> None:
     for _ in tqdm(range(episode_length)):
         # Render
         image = env.add_robot(base_image, state)
-        image = env.render_image(image, flip=True)
+        image = env.render_rgb_image(image, flip=True)
         rollout.append(image)
         
         # Update state

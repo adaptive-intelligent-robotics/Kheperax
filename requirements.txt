@@ -2,7 +2,7 @@
 jax[cuda12_pip]==0.4.28
 # evosax==0.1.6
 notebook
-
+imageio
 # brax==0.0.15
 # flax==0.6.0
 # jax>=0.3.17

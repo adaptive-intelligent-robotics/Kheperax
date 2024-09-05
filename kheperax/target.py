@@ -128,7 +128,7 @@ class TargetKheperaxTask(KheperaxTask):
     def render(self, state: KheperaxState, ) -> jnp.ndarray:
         image = self.create_image(state)
         image = self.add_robot(image, state)
-        image = self.render_image(image)
+        image = self.render_rgb_image(image)
         return image
 
     def create_image(self, state: KheperaxState, ) -> jnp.ndarray:
