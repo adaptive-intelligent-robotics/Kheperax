@@ -6,8 +6,7 @@ from jax import numpy as jnp
 from kheperax.simu_components.geoms import Pos, Segment
 
 
-@flax.struct.dataclass
-class Laser:
+class Laser(flax.struct.PyTreeNode):
     pos: Pos
     angle: float
     range: float

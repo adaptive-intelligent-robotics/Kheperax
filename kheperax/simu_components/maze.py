@@ -9,8 +9,7 @@ from jax import numpy as jnp
 from kheperax.simu_components.geoms import Segment, Pos
 
 
-@flax.struct.dataclass
-class Maze:
+class Maze(flax.struct.PyTreeNode):
     walls: Segment
 
     @classmethod

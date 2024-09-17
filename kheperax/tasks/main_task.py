@@ -46,8 +46,7 @@ class KheperaxConfig:
         )
 
 
-@flax.struct.dataclass
-class KheperaxState:
+class KheperaxState(flax.struct.PyTreeNode):
     """
     Environment state for training and inference.
     """

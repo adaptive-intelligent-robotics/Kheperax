@@ -15,8 +15,7 @@ from kheperax.simu_components.posture import Posture
 from kheperax.utils.tree_utils import get_batch_size
 
 
-@flax.struct.dataclass
-class Robot:
+class Robot(flax.struct.PyTreeNode):
     posture: Posture
     radius: float
     range_lasers: Union[float, jnp.ndarray]

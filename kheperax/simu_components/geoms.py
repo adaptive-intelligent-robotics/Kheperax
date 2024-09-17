@@ -7,8 +7,7 @@ import jax.numpy as jnp
 from kheperax.simu_components.posture import Posture
 
 
-@flax.struct.dataclass
-class Pos:
+class Pos(flax.struct.PyTreeNode):
     x: float
     y: float
 
@@ -37,8 +36,7 @@ class Pos:
         return cls(posture.x, posture.y)
 
 
-@flax.struct.dataclass
-class Disk:
+class Disk(flax.struct.PyTreeNode):
     pos: Pos
     radius: float
 
@@ -50,14 +48,12 @@ class Disk:
         return jnp.any(jax.vmap(self.does_intersect_segment)(array_segments))
 
 
-@flax.struct.dataclass
-class Line:
+class Line(flax.struct.PyTreeNode):
     p1: Pos
     p2: Pos
 
 
-@flax.struct.dataclass
-class Segment:
+class Segment(flax.struct.PyTreeNode):
     p1: Pos
     p2: Pos
 

@@ -5,8 +5,7 @@ import jax
 from jax import numpy as jnp
 
 
-@flax.struct.dataclass
-class Posture:
+class Posture(flax.struct.PyTreeNode):
     x: jnp.ndarray
     y: jnp.ndarray
     angle: jnp.ndarray
