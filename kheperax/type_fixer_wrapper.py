@@ -1,9 +1,9 @@
 import jax.numpy as jnp
+from brax.v1.envs import Wrapper
+# from brax.v1.envs import env as brax_env
 
-from brax.envs import env as brax_env
 
-
-class TypeFixerWrapper(brax_env.Wrapper):
+class TypeFixerWrapper(Wrapper):
     def reset(self, rng: jnp.ndarray):
         reset_state = self.env.reset(rng)
         reset_state.info["truncation"] = jnp.asarray(reset_state.info["truncation"], dtype=jnp.int32)

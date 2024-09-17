@@ -1,8 +1,14 @@
 .idea/
 __pycache__/
 
-*.png
+# *.png
 *.pdf
 results*
 
 venv/
+*.egg-info/
+
+.vscode/
+results/*
+
+apptainer/*

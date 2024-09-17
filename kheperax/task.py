@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 from typing import List, Tuple, Dict, Any
 
-import brax.envs
+import brax.v1.envs
 import flax.struct
 import jax.numpy as jnp
 import jax.tree_util
@@ -13,13 +13,13 @@ from qdax.environments.bd_extractors import (
     get_final_xy_position,
 )
 from qdax.tasks.brax_envs import create_brax_scoring_fn
-from qdax.types import RNGKey
+from qdax.custom_types import RNGKey
 
 from kheperax.maze import Maze
 from kheperax.rendering_tools import RenderingTools
 from kheperax.robot import Robot
 from kheperax.type_fixer_wrapper import TypeFixerWrapper
-
+from brax.v1.envs import Env
 
 @dataclasses.dataclass
 class KheperaxConfig:
@@ -30,6 +30,7 @@ class KheperaxConfig:
     robot: Robot
     std_noise_wheel_velocities: float
     resolution: Tuple[int, int]
+    limits: Tuple[List[float], List[float]]
 
     @classmethod
     def get_default(cls):
@@ -41,6 +42,7 @@ class KheperaxConfig:
             maze=Maze.create_default_maze(),
             robot=Robot.create_default_robot(),
             std_noise_wheel_velocities=0.0,
+            limits=([0., 0.], [1., 1.])
         )
 
 
@@ -59,7 +61,7 @@ class KheperaxState:
     info: Dict[str, Any] = flax.struct.field(default_factory=dict)
 
 
-class KheperaxTask(brax.envs.env.Env):
+class KheperaxTask(Env):
     def __init__(self, kheperax_config: KheperaxConfig, **kwargs):
         self.kheperax_config = kheperax_config
         super().__init__(None, **kwargs)
@@ -70,7 +72,7 @@ class KheperaxTask(brax.envs.env.Env):
                             random_key,
                             ):
         env = cls(kheperax_config)
-        env = brax.envs.wrappers.EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
+        env = brax.v1.envs.wrappers.EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
         env = TypeFixerWrapper(env)
 
         # Init policy network
@@ -188,10 +190,14 @@ class KheperaxTask(brax.envs.env.Env):
     @property
     def state_descriptor_length(self) -> int:
         return 2
+    
+    @property
+    def behavior_descriptor_length(self) -> int:
+        return 2
 
     @property
     def behavior_descriptor_limits(self) -> Tuple[List[float], List[float]]:
-        return [0., 0.], [1., 1.]
+        return self.kheperax_config.limits
 
     @property
     def backend(self) -> str:
