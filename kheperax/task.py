@@ -5,7 +5,6 @@ from typing import List, Tuple, Dict, Any
 
 import brax.v1.envs
 import flax.struct
-import jax.numpy as jnp
 import jax.tree_util
 from jax import numpy as jnp
 from qdax.core.neuroevolution.networks.networks import MLP

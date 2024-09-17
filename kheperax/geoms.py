@@ -12,7 +12,7 @@ class Pos:
     x: float
     y: float
 
-    def __sub__(self, other):
+    def __sub__(self, other: Pos) -> Pos:
         return Pos(self.x - other.x, self.y - other.y)
 
     def dist_to(self, other: Pos) -> jnp.ndarray:
@@ -33,7 +33,7 @@ class Pos:
         return Pos(x3 + u_clipped * (x4 - x3), y3 + u_clipped * (y4 - y3))
 
     @classmethod
-    def from_posture(cls, posture: Posture):
+    def from_posture(cls, posture: Posture) -> Pos:
         return cls(posture.x, posture.y)
 
 
@@ -42,11 +42,11 @@ class Disk:
     pos: Pos
     radius: float
 
-    def does_intersect_segment(self, segment: Segment) -> bool:
+    def does_intersect_segment(self, segment: Segment) -> jax.Array:
         projection = self.pos.calculate_projection_on_segment(segment)
         return projection.dist_to(self.pos) <= self.radius
 
-    def collides(self, array_segments):
+    def collides(self, array_segments: Segment) -> jax.Array:
         return jnp.any(jax.vmap(self.does_intersect_segment)(array_segments))
 
 
@@ -61,8 +61,8 @@ class Segment:
     p1: Pos
     p2: Pos
 
-    def check_intersection_with(self, other: Segment) -> bool:
-        def ccw(a: Pos, b: Pos, c: Pos):
+    def check_intersection_with(self, other: Segment) -> jax.Array:
+        def ccw(a: Pos, b: Pos, c: Pos) -> bool:
             return (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x)
 
         return jnp.logical_and(

@@ -3,10 +3,12 @@ import jax.numpy as jnp
 
 from kheperax.geoms import Segment, Pos
 
+
 def make_meshgrid(cfg, image):
     (min_x, min_y), (max_x, max_y) = cfg.limits
     x, y = jnp.meshgrid(jnp.linspace(min_x, max_x, image.shape[0]), jnp.linspace(min_y, max_y, image.shape[1]))
     return x, y
+
 
 class RenderingTools:
     @classmethod
