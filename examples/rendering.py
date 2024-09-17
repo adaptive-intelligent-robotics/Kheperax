@@ -23,11 +23,7 @@ def example_usage_render():
     random_key, subkey = jax.random.split(subkey)
     init_state = env.reset(subkey)
 
-    print(init_state.obs)
-
     img = env.render(init_state)
-    print(img.shape)
-    print(img)
 
     plt.imshow(img, origin='lower')
     plt.xticks([])

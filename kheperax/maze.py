@@ -15,7 +15,6 @@ class Maze:
 
     @classmethod
     def create(cls, segments_list: List[Segment] = None):
-        # print("segments_list", segments_list)
         if segments_list is None:
             segments_list = []
 

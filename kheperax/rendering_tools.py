@@ -58,7 +58,6 @@ class RenderingTools:
         points = Pos(x=x, y=y)
         distances = get_distance_point_to_segment_vvv(points, segments)
         distances = jnp.min(distances, axis=(0,))
-        # print("distances", distances.shape)
 
         return jnp.where(
             distances <= 0.005,
