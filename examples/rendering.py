@@ -3,7 +3,7 @@ from __future__ import annotations
 import jax.random
 from matplotlib import pyplot as plt
 
-from kheperax.task import KheperaxConfig, KheperaxTask
+from kheperax.tasks.main_task import KheperaxConfig, KheperaxTask
 
 
 def example_usage_render():

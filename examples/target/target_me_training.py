@@ -12,7 +12,6 @@ from tqdm import tqdm
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
-from kheperax.maze import Maze
 
 from qdax.core.containers.mapelites_repertoire import compute_euclidean_centroids
 from qdax.core.emitters.mutation_operators import isoline_variation
@@ -22,7 +21,7 @@ from qdax.utils.metrics import default_qd_metrics
 from qdax.utils.plotting import plot_2d_map_elites_repertoire, plot_map_elites_results
 
 # from kheperax.task import KheperaxTask, KheperaxConfig
-from kheperax.target import TargetKheperaxConfig, TargetKheperaxTask
+from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
 def run_me(map_name='standard') -> None:
     print(f"Running ME on {map_name}")

@@ -7,9 +7,9 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 import jax.random
 from matplotlib import pyplot as plt
 
-from kheperax.maps import KHERPERAX_MAZES
-from kheperax.target import TargetKheperaxConfig, TargetKheperaxTask
-from kheperax.quad_task import QuadKheperaxConfig
+from kheperax.tasks.maps import KHERPERAX_MAZES
+from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
+from kheperax.tasks.quad_task import QuadKheperaxConfig
 
 def example_usage_render(map_name='standard'):
 

@@ -1,17 +1,19 @@
+from typing import List
+
 import dataclasses
-import jax
-import jax.numpy as jnp
 
-from kheperax.geoms import Pos, Segment
-from kheperax.target import TargetKheperaxConfig, DEFAULT_RESOLUTION
+from kheperax.simu_components.geoms import Pos, Segment
 from kheperax.maps import KHERPERAX_MAZES
+from kheperax.simu_components.maze import Maze
+from kheperax.simu_components.posture import Posture
+from kheperax.simu_components.robot import Robot
+from kheperax.tasks.target import TargetKheperaxConfig, DEFAULT_RESOLUTION
 
-from kheperax.maze import Maze
-from kheperax.robot import Robot
-from kheperax.posture import Posture
 
-
-def flip_segment(segment, flip_x, flip_y):
+def flip_segment(segment: Segment, flip_x: bool, flip_y: bool) -> Segment:
+    """
+    Flip a segment in the x and/or y-axis.
+    """
     p1 = segment.p1
     p2 = segment.p2
     if flip_x:
@@ -22,27 +24,29 @@ def flip_segment(segment, flip_x, flip_y):
         p2 = Pos(-p2.x, p2.y)
     return Segment(p1, p2)
 
-def flip_map(map, flip_x, flip_y):
+
+def flip_map(map: Map, flip_x: bool, flip_y: bool) -> List[Segment]:
     base_segments = map["segments"]
     segments = [flip_segment(
-        s, 
+        s,
         flip_x=flip_x,
         flip_y=flip_y
-        ) for s in base_segments]
+    ) for s in base_segments]
     return segments
+
 
 @dataclasses.dataclass
 class QuadKheperaxConfig(TargetKheperaxConfig):
     @classmethod
     def get_map(cls, map_name):
         map = KHERPERAX_MAZES[map_name]
-        limits=([-1., -1.], [1., 1.])
+        limits = ([-1., -1.], [1., 1.])
         segments = []
         for flip_x in [False, True]:
             for flip_y in [False, True]:
                 segments += flip_map(map, flip_x=flip_x, flip_y=flip_y)
-        
-        robot=Robot.create_default_robot()
+
+        robot = Robot.create_default_robot()
         # Start in the middle
         robot = robot.replace(
             posture=Posture(0., 0., robot.posture.angle)
@@ -63,4 +67,3 @@ class QuadKheperaxConfig(TargetKheperaxConfig):
             target_radius=map["target_radius"],
             limits=limits
         )
-    

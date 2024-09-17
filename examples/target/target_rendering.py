@@ -7,7 +7,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 import jax.random
 from matplotlib import pyplot as plt
 
-from kheperax.target import TargetKheperaxConfig, TargetKheperaxTask
+from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
 
 def example_usage_render():

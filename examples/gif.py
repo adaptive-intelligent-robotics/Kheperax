@@ -5,13 +5,10 @@ import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import jax.random
-import jax.numpy as jnp
 from matplotlib import pyplot as plt
-from PIL import Image
 
-from kheperax.task import KheperaxConfig, KheperaxTask
-from kheperax.target import TargetKheperaxConfig, TargetKheperaxTask
-from kheperax.quad_task import QuadKheperaxConfig
+from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
+from kheperax.tasks.quad_task import QuadKheperaxConfig
 
 def example_usage_gif(map_name='standard'):
     print(f"Rendering GIF {map_name}")

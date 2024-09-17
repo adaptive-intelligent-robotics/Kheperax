@@ -4,7 +4,7 @@ import flax.struct
 import jax
 import jax.numpy as jnp
 
-from kheperax.posture import Posture
+from kheperax.simu_components.posture import Posture
 
 
 @flax.struct.dataclass

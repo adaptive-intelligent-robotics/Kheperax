@@ -6,7 +6,7 @@ import flax.struct
 import jax.tree_util
 from jax import numpy as jnp
 
-from kheperax.geoms import Segment, Pos
+from kheperax.simu_components.geoms import Segment, Pos
 
 
 @flax.struct.dataclass
@@ -29,10 +29,10 @@ class Maze:
         )
 
         return Maze(walls)
-    
+
     @classmethod
     def create_custom(
-            cls, 
+            cls,
             limits,
             segments_list: List[Segment] = None
         ):

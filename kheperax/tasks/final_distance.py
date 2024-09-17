@@ -1,43 +1,29 @@
-import functools
 import jax
 from jax import numpy as jnp
-import dataclasses
 import brax.v1.envs
 import flax.linen as nn
-from functools import partial
-from typing import Callable, Optional, Tuple
+from typing import Callable, Tuple
 
-from qdax.core.neuroevolution.networks.networks import MLP
 from qdax.tasks.brax_envs import create_brax_scoring_fn
 from qdax.environments.bd_extractors import (
     get_final_xy_position,
 )
 
-from qdax.tasks.brax_envs import reset_based_scoring_function_brax_envs
 from qdax.core.neuroevolution.buffers.buffer import QDTransition
-from qdax.core.neuroevolution.mdp_utils import generate_unroll
 from qdax.core.neuroevolution.networks.networks import MLP
 from qdax.custom_types import (
-    Descriptor,
     EnvState,
-    ExtraScores,
-    Fitness,
-    Genotype,
     Params,
     RNGKey,
 )
 
 
-from kheperax.task import KheperaxConfig, KheperaxTask, KheperaxState
-from kheperax.target import TargetKheperaxConfig, TargetKheperaxTask
-from kheperax.maze import Maze
-from kheperax.rendering_tools import RenderingTools
-from kheperax.robot import Robot
-from kheperax.type_fixer_wrapper import TypeFixerWrapper
-from kheperax.target import TargetKheperaxConfig, TargetKheperaxTask
+from kheperax.task import KheperaxConfig, KheperaxState
+from kheperax.utils.type_fixer_wrapper import TypeFixerWrapper
+from kheperax.tasks.target import TargetKheperaxTask
 
 
-def make_final_policy_network_play_step_fn_brax(
+def make_final_policy_network_play_step_fn_brax( # TODO: ?
     env: brax.v1.envs.Env,
     policy_network: nn.Module,
 ) -> Callable[
@@ -97,7 +83,7 @@ def make_final_policy_network_play_step_fn_brax(
         #     jnp.ones_like(next_state.reward),
         #     jnp.zeros_like(next_state.reward),
         # )
-        final_reward = distance_reward 
+        final_reward = distance_reward
 
         transition = QDTransition(
             obs=env_state.obs,
@@ -111,7 +97,7 @@ def make_final_policy_network_play_step_fn_brax(
         )
 
         return next_state, policy_params, random_key, transition
-    
+
     return final_play_step_fn
 
 
@@ -152,7 +138,7 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
         )
 
         return env, policy_network, scoring_fn
-    
+
     def step(self, state: KheperaxState, action: jnp.ndarray) -> KheperaxState:
         random_key = state.random_key
 
@@ -179,7 +165,7 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
         # done = False
 
         # done if the robot is in the target of if already done
-        done = target_dist < self.kheperax_config.target_radius 
+        done = target_dist < self.kheperax_config.target_radius
 
         # Reward 0 if target is reached
         reward = jnp.where(

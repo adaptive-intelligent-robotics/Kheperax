@@ -1,7 +1,7 @@
 import jax
 import jax.numpy as jnp
 
-from kheperax.geoms import Segment, Pos
+from kheperax.simu_components.geoms import Segment, Pos
 
 
 def make_meshgrid(cfg, image):

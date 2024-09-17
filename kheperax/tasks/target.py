@@ -9,13 +9,13 @@ from qdax.environments.bd_extractors import (
 )
 from qdax.tasks.brax_envs import create_brax_scoring_fn
 
-from kheperax.geoms import Segment, Pos
-from kheperax.maps import KHERPERAX_MAZES
-from kheperax.maze import Maze
-from kheperax.rendering_tools import RenderingTools
-from kheperax.robot import Robot
-from kheperax.task import KheperaxConfig, KheperaxTask, KheperaxState
-from kheperax.type_fixer_wrapper import TypeFixerWrapper
+from kheperax.simu_components.geoms import Segment, Pos
+from kheperax.tasks.maps import KHERPERAX_MAZES
+from kheperax.simu_components.maze import Maze
+from kheperax.utils.rendering_tools import RenderingTools
+from kheperax.simu_components.robot import Robot
+from kheperax.tasks.main_task import KheperaxConfig, KheperaxTask, KheperaxState
+from kheperax.utils.type_fixer_wrapper import TypeFixerWrapper
 
 DEFAULT_RESOLUTION = (1024, 1024)
 

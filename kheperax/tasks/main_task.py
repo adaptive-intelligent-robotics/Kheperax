@@ -1,24 +1,25 @@
 from __future__ import annotations
 
-import dataclasses
 from typing import List, Tuple, Dict, Any
 
 import brax.v1.envs
+import dataclasses
 import flax.struct
 import jax.tree_util
+from brax.v1.envs import Env
 from jax import numpy as jnp
 from qdax.core.neuroevolution.networks.networks import MLP
+from qdax.custom_types import RNGKey
 from qdax.environments.bd_extractors import (
     get_final_xy_position,
 )
 from qdax.tasks.brax_envs import create_brax_scoring_fn
-from qdax.custom_types import RNGKey
 
-from kheperax.maze import Maze
-from kheperax.rendering_tools import RenderingTools
-from kheperax.robot import Robot
-from kheperax.type_fixer_wrapper import TypeFixerWrapper
-from brax.v1.envs import Env
+from kheperax.simu_components.maze import Maze
+from kheperax.utils.rendering_tools import RenderingTools
+from kheperax.simu_components.robot import Robot
+from kheperax.utils.type_fixer_wrapper import TypeFixerWrapper
+
 
 @dataclasses.dataclass
 class KheperaxConfig:
@@ -189,7 +190,7 @@ class KheperaxTask(Env):
     @property
     def state_descriptor_length(self) -> int:
         return 2
-    
+
     @property
     def behavior_descriptor_length(self) -> int:
         return 2

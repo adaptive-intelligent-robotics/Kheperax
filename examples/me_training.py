@@ -9,7 +9,6 @@ import functools
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
-from kheperax.maze import Maze
 
 from qdax.core.containers.mapelites_repertoire import compute_euclidean_centroids
 from qdax.core.emitters.mutation_operators import isoline_variation
@@ -18,7 +17,7 @@ from qdax.core.map_elites import MAPElites
 from qdax.utils.metrics import default_qd_metrics
 from qdax.utils.plotting import plot_2d_map_elites_repertoire
 
-from kheperax.task import KheperaxTask, KheperaxConfig
+from kheperax.tasks.main_task import KheperaxTask, KheperaxConfig
 
 
 def run_me() -> None:
