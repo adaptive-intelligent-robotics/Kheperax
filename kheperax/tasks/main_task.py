@@ -16,8 +16,8 @@ from qdax.environments.bd_extractors import (
 from qdax.tasks.brax_envs import create_brax_scoring_fn
 
 from kheperax.simu_components.maze import Maze
-from kheperax.utils.rendering_tools import RenderingTools
 from kheperax.simu_components.robot import Robot
+from kheperax.utils.rendering_tools import RenderingTools
 from kheperax.utils.type_fixer_wrapper import TypeFixerWrapper
 
 

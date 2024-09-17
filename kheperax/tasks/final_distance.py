@@ -18,12 +18,12 @@ from qdax.custom_types import (
 )
 
 
-from kheperax.task import KheperaxConfig, KheperaxState
+from kheperax.tasks.main_task import KheperaxConfig, KheperaxState
 from kheperax.utils.type_fixer_wrapper import TypeFixerWrapper
 from kheperax.tasks.target import TargetKheperaxTask
 
 
-def make_final_policy_network_play_step_fn_brax( # TODO: ?
+def make_final_policy_network_play_step_fn_brax(  # TODO: ?
     env: brax.v1.envs.Env,
     policy_network: nn.Module,
 ) -> Callable[

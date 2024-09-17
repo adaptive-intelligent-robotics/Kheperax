@@ -31,19 +31,19 @@ class TargetKheperaxConfig(KheperaxConfig):
 
     @classmethod
     def get_map(cls, map_name):
-        map = KHERPERAX_MAZES[map_name]
+        maze_map = KHERPERAX_MAZES[map_name]
         return cls(
             episode_length=1000,
             mlp_policy_hidden_layer_sizes=(8,),
             resolution=DEFAULT_RESOLUTION,
             action_scale=0.025,
             maze=Maze.create(
-                segments_list=map["segments"]
+                segments_list=maze_map["segments"]
             ),
             robot=Robot.create_default_robot(),
             std_noise_wheel_velocities=0.0,
-            target_pos=map["target_pos"],
-            target_radius=map["target_radius"],
+            target_pos=maze_map["target_pos"],
+            target_radius=maze_map["target_radius"],
             limits=([0., 0.], [1., 1.])
         )
 

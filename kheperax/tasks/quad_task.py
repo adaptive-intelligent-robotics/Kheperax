@@ -25,7 +25,7 @@ def flip_segment(segment: Segment, flip_x: bool, flip_y: bool) -> Segment:
     return Segment(p1, p2)
 
 
-def flip_map(map: Map, flip_x: bool, flip_y: bool) -> List[Segment]:
+def flip_map(map, flip_x: bool, flip_y: bool) -> List[Segment]:
     base_segments = map["segments"]
     segments = [flip_segment(
         s,

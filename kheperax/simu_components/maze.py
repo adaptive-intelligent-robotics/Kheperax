@@ -32,10 +32,10 @@ class Maze:
 
     @classmethod
     def create_custom(
-            cls,
-            limits,
-            segments_list: List[Segment] = None
-        ):
+        cls,
+        limits,
+        segments_list: List[Segment] = None
+    ):
         if segments_list is None:
             segments_list = []
         (min_x, min_y), (max_x, max_y) = limits
