@@ -1,18 +1,19 @@
 from __future__ import annotations
 
-# Remove FutureWarning 
+# Remove FutureWarning
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import jax.random
 from matplotlib import pyplot as plt
 
 from kheperax.tasks.maps import KHERPERAX_MAZES
-from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 from kheperax.tasks.quad_task import QuadKheperaxConfig
+from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 def example_usage_render(map_name='standard'):
-
     random_key = jax.random.PRNGKey(1)
 
     random_key, subkey = jax.random.split(random_key)
@@ -42,6 +43,7 @@ def example_usage_render(map_name='standard'):
     file_name = f'maps/{map_name}.png'
     plt.savefig(file_name)
     print("Saved file:", file_name)
+
 
 def quad_maps_render(map_name='standard'):
     print(f"Rendering Quad {map_name}")
@@ -76,10 +78,14 @@ def quad_maps_render(map_name='standard'):
     print("Saved file:", file_name)
 
 
-if __name__ == '__main__':
+def run_example():
     # matplotlib backend agg for headless mode
     plt.switch_backend("agg")
     for map_name in KHERPERAX_MAZES:
         print(map_name)
         quad_maps_render(map_name)
         example_usage_render(map_name)
+
+
+if __name__ == '__main__':
+    run_example()

@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-# Remove FutureWarning 
+# Remove FutureWarning
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import jax.random
 from matplotlib import pyplot as plt
 
 from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 def example_usage_render():
-
     random_key = jax.random.PRNGKey(1)
 
     random_key, subkey = jax.random.split(random_key)

@@ -2,26 +2,24 @@
 Example directly inspired from:
 https://github.com/adaptive-intelligent-robotics/QDax/blob/b44969f94aaa70dc6e53aaed95193f65f20400c2/examples/scripts/me_example.py
 """
-# Remove FutureWarning 
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-
 import functools
-from tqdm import tqdm 
+import warnings  # Remove FutureWarning
 
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
-
 from qdax.core.containers.mapelites_repertoire import compute_euclidean_centroids
 from qdax.core.emitters.mutation_operators import isoline_variation
 from qdax.core.emitters.standard_emitters import MixingEmitter
 from qdax.core.map_elites import MAPElites
 from qdax.utils.metrics import default_qd_metrics
 from qdax.utils.plotting import plot_2d_map_elites_repertoire, plot_map_elites_results
+from tqdm import tqdm
 
-# from kheperax.task import KheperaxTask, KheperaxConfig
 from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 def run_me(map_name='standard') -> None:
     print(f"Running ME on {map_name}")
@@ -115,7 +113,7 @@ def run_me(map_name='standard') -> None:
             random_key,
         )
         all_metrics.append(metrics)
-        print(f"{iteration}/{num_iterations} - { {k:v.item() for (k,v) in metrics.items()} }")
+        print(f"{iteration}/{num_iterations} - { {k: v.item() for (k, v) in metrics.items()} }")
 
     metrics = {
         k: jnp.stack([m[k] for m in all_metrics]) for k in all_metrics[0].keys()
@@ -150,9 +148,9 @@ def run_me(map_name='standard') -> None:
     # Record gif
     elite_index = jnp.argmax(repertoire.fitnesses)
     elite = jax.tree_util.tree_map(
-        lambda x: x[elite_index], 
+        lambda x: x[elite_index],
         repertoire.genotypes
-        )
+    )
 
     jit_env_step = jax.jit(env.step)
     jit_inference_fn = jax.jit(policy_network.apply)
@@ -166,7 +164,7 @@ def run_me(map_name='standard') -> None:
         image = env.add_robot(base_image, state)
         image = env.render_rgb_image(image, flip=True)
         rollout.append(image)
-        
+
         # Update state
         if state.done:
             break
@@ -176,13 +174,18 @@ def run_me(map_name='standard') -> None:
     # Make GIF
     import imageio
     fps = 30
-    duration = 1000/fps
+    duration = 1000 / fps
     imageio.mimsave("results/target_policy.gif", rollout, duration=duration)
-        
-# map_name='standard'
-map_name='pointmaze'
 
-if __name__ == "__main__":
+
+def run_example():
+    # map_name='standard'
+    map_name = 'pointmaze'
+
     # matplotlib backend agg for headless mode
     plt.switch_backend("agg")
     run_me(map_name)
+
+
+if __name__ == "__main__":
+    run_example()

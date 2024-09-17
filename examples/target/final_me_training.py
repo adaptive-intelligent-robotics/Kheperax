@@ -2,28 +2,29 @@
 Example directly inspired from:
 https://github.com/adaptive-intelligent-robotics/QDax/blob/b44969f94aaa70dc6e53aaed95193f65f20400c2/examples/scripts/me_example.py
 """
-# Remove FutureWarning 
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-
 import functools
-from tqdm import tqdm 
+# Remove FutureWarning
+import warnings
 
+import imageio
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
-
 from qdax.core.containers.mapelites_repertoire import compute_euclidean_centroids
 from qdax.core.emitters.mutation_operators import isoline_variation
 from qdax.core.emitters.standard_emitters import MixingEmitter
 from qdax.core.map_elites import MAPElites
 from qdax.utils.metrics import default_qd_metrics
 from qdax.utils.plotting import plot_2d_map_elites_repertoire, plot_map_elites_results
+from tqdm import tqdm
 
 # from kheperax.task import KheperaxTask, KheperaxConfig
 from kheperax.tasks.final_distance import FinalDistKheperaxTask
-from kheperax.tasks.target import TargetKheperaxConfig
 from kheperax.tasks.quad_task import QuadKheperaxConfig
+from kheperax.tasks.target import TargetKheperaxConfig
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 def run_me(map_name='standard') -> None:
     print(f"Running ME on {map_name}")
@@ -90,7 +91,7 @@ def run_me(map_name='standard') -> None:
     )
 
     # Define a metrics function
-    qd_offset = jnp.sqrt(2)*100 + episode_length
+    qd_offset = jnp.sqrt(2) * 100 + episode_length
     metrics_fn = functools.partial(
         default_qd_metrics,
         qd_offset=qd_offset,
@@ -124,7 +125,7 @@ def run_me(map_name='standard') -> None:
             random_key,
         )
         all_metrics.append(metrics)
-        print(f"{iteration}/{num_iterations} - { {k:v.item() for (k,v) in metrics.items()} }")
+        print(f"{iteration}/{num_iterations} - { {k: v.item() for (k, v) in metrics.items()} }")
 
     metrics = {
         k: jnp.stack([m[k] for m in all_metrics]) for k in all_metrics[0].keys()
@@ -159,9 +160,9 @@ def run_me(map_name='standard') -> None:
     # Record gif
     elite_index = jnp.argmax(repertoire.fitnesses)
     elite = jax.tree_util.tree_map(
-        lambda x: x[elite_index], 
+        lambda x: x[elite_index],
         repertoire.genotypes
-        )
+    )
 
     jit_env_step = jax.jit(env.step)
     jit_inference_fn = jax.jit(policy_network.apply)
@@ -176,7 +177,7 @@ def run_me(map_name='standard') -> None:
         image = env.add_lasers(image, state)
         image = env.render_rgb_image(image, flip=True)
         rollout.append(image)
-        
+
         # Update state
         if state.done:
             break
@@ -184,21 +185,24 @@ def run_me(map_name='standard') -> None:
         state = jit_env_step(state, action)
 
     # Make GIF
-    import imageio
     fps = 30
-    duration = 1000/fps
+    duration = 1000 / fps
     imageio.mimsave("results/final_dist.gif", rollout, duration=duration, loop=0)
-        
 
-map_name='standard'
-# map_name='pointmaze'
-# map_name='snake'
 
-quad=True
-# quad=False
+def run_example():
+    map_name = 'standard'
+    # map_name='pointmaze'
+    # map_name='snake'
 
-if __name__ == "__main__":
+    quad = True
+    # quad=False
+
     # matplotlib backend agg for headless mode
     plt.switch_backend("agg")
     map_name = ("quad_" if quad else "") + map_name
     run_me(map_name)
+
+
+if __name__ == "__main__":
+    run_example()

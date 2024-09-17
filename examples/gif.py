@@ -1,14 +1,18 @@
 from __future__ import annotations
 
-# Remove FutureWarning 
+# Remove FutureWarning
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
 
+import imageio
 import jax.random
 from matplotlib import pyplot as plt
+from tqdm import tqdm
 
-from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 from kheperax.tasks.quad_task import QuadKheperaxConfig
+from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 def example_usage_gif(map_name='standard'):
     print(f"Rendering GIF {map_name}")
@@ -36,13 +40,11 @@ def example_usage_gif(map_name='standard'):
     jit_inference_fn = jax.jit(policy_network.apply)
     state = env.reset(subkey)
 
-
     rollout = []
     base_image = env.create_image(state)
 
     episode_length = config_kheperax.episode_length
-    episode_length = 10 # debug
-    from tqdm import tqdm 
+    episode_length = 10  # debug
     for _ in tqdm(range(episode_length)):
         # Render
         image = env.add_robot(base_image, state)
@@ -53,27 +55,30 @@ def example_usage_gif(map_name='standard'):
         action = jax.random.uniform(random_key, shape=(env.action_size,), minval=-1.0, maxval=1.0)
         state = jit_env_step(state, action)
 
-
     # Make GIF
-    import imageio
     fps = 30
-    duration = 1000/fps
+    duration = 1000 / fps
     imageio.mimsave(
-        "results/kheperax.gif", 
-        rollout, 
+        "results/kheperax.gif",
+        rollout,
         duration=duration,
         loop=0,
-        )
+    )
 
-map_name='standard'
-# map_name='pointmaze'
-# map_name='snake'
 
-# quad=True
-quad=False
+def run_example():
+    map_name = 'standard'
+    # map_name='pointmaze'
+    # map_name='snake'
 
-if __name__ == '__main__':
+    # quad=True
+    quad = False
+
     # matplotlib backend agg for headless mode
     map_name = ("quad_" if quad else "") + map_name
     plt.switch_backend("agg")
     example_usage_gif(map_name)
+
+
+if __name__ == '__main__':
+    run_example()
