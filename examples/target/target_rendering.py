@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Remove FutureWarning
 import warnings
+from pathlib import Path
 
 import jax.random
 from matplotlib import pyplot as plt
@@ -38,7 +39,9 @@ def example_usage_render():
     plt.xticks([])
     plt.yticks([])
 
-    file_name = 'results/target_maze.png'
+    folder_save = Path('output')
+    folder_save.mkdir(exist_ok=True, parents=True)
+    file_name = folder_save / "maze.png"
     plt.savefig(file_name)
     print("Saved file:", file_name)
 

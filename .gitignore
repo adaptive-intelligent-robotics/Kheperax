@@ -5,6 +5,7 @@ last_repertoire
 *logs.csv
 .idea/
 __pycache__/
+output/
 
 # Singularity generated files
 *.simg
@@ -15,7 +16,6 @@ tmp.def
 
 # Figures and Videos
 *.pth
-*.png
 *.svg
 *.pdf
 *.mp4
