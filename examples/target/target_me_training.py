@@ -4,6 +4,7 @@ https://github.com/adaptive-intelligent-robotics/QDax/blob/b44969f94aaa70dc6e53a
 """
 import functools
 import warnings  # Remove FutureWarning
+from pathlib import Path
 
 import jax
 import jax.numpy as jnp
@@ -16,7 +17,7 @@ from qdax.utils.metrics import default_qd_metrics
 from qdax.utils.plotting import plot_2d_map_elites_repertoire, plot_map_elites_results
 from tqdm import tqdm
 
-from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
+from kheperax.tasks.target_task import TargetKheperaxConfig, TargetKheperaxTask
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -24,8 +25,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 def run_me(map_name='standard') -> None:
     print(f"Running ME on {map_name}")
     seed = 42
-    batch_size = 2048
-    num_evaluations = int(1e6)
+    batch_size = 128
+    num_evaluations = int(5e4)
     num_iterations = num_evaluations // batch_size
     grid_shape = (50, 50)
     mlp_policy_hidden_layer_sizes = (8,)
@@ -105,9 +106,11 @@ def run_me(map_name='standard') -> None:
         init_variables, centroids, random_key
     )
 
+    update_fn = jax.jit(map_elites.update)
+
     all_metrics = []
     for iteration in range(num_iterations):
-        (repertoire, emitter_state, metrics, random_key,) = map_elites.update(
+        (repertoire, emitter_state, metrics, random_key,) = update_fn(
             repertoire,
             emitter_state,
             random_key,
@@ -129,7 +132,9 @@ def run_me(map_name='standard') -> None:
         # vmin=-0.2,
         # vmax=0.0,
     )
-    plt.savefig("results/target_repertoire.png")
+    save_folder = Path("outcome/")
+    save_folder.mkdir(exist_ok=True, parents=True)
+    plt.savefig(save_folder / "target_repertoire.png")
     # plt.show()
 
     env_steps = jnp.arange(1, num_iterations + 1) * batch_size * episode_length
@@ -143,7 +148,7 @@ def run_me(map_name='standard') -> None:
     # Make big title
     plt.suptitle("Map-Elites in Target-based Kheperax", y=0.9, fontsize=20)
 
-    plt.savefig("results/ME_stats.png")
+    plt.savefig(save_folder / "ME_stats.png")
 
     # Record gif
     elite_index = jnp.argmax(repertoire.fitnesses)
@@ -175,7 +180,9 @@ def run_me(map_name='standard') -> None:
     import imageio
     fps = 30
     duration = 1000 / fps
-    imageio.mimsave("results/target_policy.gif", rollout, duration=duration)
+    name_file = f"target_policy_{map_name}.gif"
+    imageio.mimsave(save_folder / name_file, rollout, duration=duration)
+    print(f"Saved gif: {save_folder / name_file}")
 
 
 def run_example():

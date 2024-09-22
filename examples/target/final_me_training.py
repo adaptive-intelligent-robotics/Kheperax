@@ -5,6 +5,7 @@ https://github.com/adaptive-intelligent-robotics/QDax/blob/b44969f94aaa70dc6e53a
 import functools
 # Remove FutureWarning
 import warnings
+from pathlib import Path
 
 import imageio
 import jax
@@ -18,16 +19,15 @@ from qdax.utils.metrics import default_qd_metrics
 from qdax.utils.plotting import plot_2d_map_elites_repertoire, plot_map_elites_results
 from tqdm import tqdm
 
-# from kheperax.task import KheperaxTask, KheperaxConfig
 from kheperax.tasks.final_distance import FinalDistKheperaxTask
 from kheperax.tasks.quad_task import QuadKheperaxConfig
-from kheperax.tasks.target import TargetKheperaxConfig
+from kheperax.tasks.target_task import TargetKheperaxConfig
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 def run_me(map_name='standard') -> None:
-    print(f"Running ME on {map_name}")
+    print(f"Running MAP-Elites on {map_name}")
 
     seed = 42
     batch_size = 2048
@@ -52,8 +52,6 @@ def run_me(map_name='standard') -> None:
         config_kheperax = TargetKheperaxConfig.get_map(map_name)
     config_kheperax.episode_length = episode_length
     config_kheperax.mlp_policy_hidden_layer_sizes = mlp_policy_hidden_layer_sizes
-
-    print(config_kheperax.resolution)
 
     # Example of modification of the robots attributes (same thing could be done with the maze)
     config_kheperax.robot = config_kheperax.robot.replace(lasers_return_minus_one_if_out_of_range=True)
@@ -117,9 +115,11 @@ def run_me(map_name='standard') -> None:
         init_variables, centroids, random_key
     )
 
+    update_fn = jax.jit(map_elites.update)
+
     all_metrics = []
     for iteration in range(num_iterations):
-        (repertoire, emitter_state, metrics, random_key,) = map_elites.update(
+        (repertoire, emitter_state, metrics, random_key,) = update_fn(
             repertoire,
             emitter_state,
             random_key,
@@ -141,7 +141,9 @@ def run_me(map_name='standard') -> None:
         # vmin=-0.2,
         # vmax=0.0,
     )
-    plt.savefig("results/final_dist_repertoire.png")
+    save_folder = Path("output/")
+    save_folder.mkdir(exist_ok=True, parents=True)
+    plt.savefig(save_folder / "final_dist_repertoire.png")
     # plt.show()
 
     env_steps = jnp.arange(1, num_iterations + 1) * batch_size * episode_length
@@ -155,7 +157,7 @@ def run_me(map_name='standard') -> None:
     # Make big title
     plt.suptitle("Map-Elites in Final-Distance Kheperax", y=0.9, fontsize=20)
 
-    plt.savefig("results/final_distME_stats.png")
+    plt.savefig(save_folder / "final_distME_stats.png")
 
     # Record gif
     elite_index = jnp.argmax(repertoire.fitnesses)
@@ -187,7 +189,9 @@ def run_me(map_name='standard') -> None:
     # Make GIF
     fps = 30
     duration = 1000 / fps
-    imageio.mimsave("results/final_dist.gif", rollout, duration=duration, loop=0)
+    name_file = f"final_dist_{map_name}.gif"
+    imageio.mimsave(save_folder / name_file, rollout, duration=duration, loop=0)
+    print(f"Saved gif: {save_folder / name_file}")
 
 
 def run_example():

@@ -5,6 +5,7 @@ https://github.com/adaptive-intelligent-robotics/QDax/blob/b44969f94aaa70dc6e53a
 
 
 import functools
+from pathlib import Path
 
 import jax
 import jax.numpy as jnp
@@ -102,9 +103,11 @@ def run_me() -> None:
         init_variables, centroids, random_key
     )
 
+    update_fn = jax.jit(map_elites.update)
+
     # Run MAP-Elites loop
     for iteration in range(num_iterations):
-        (repertoire, emitter_state, metrics, random_key,) = map_elites.update(
+        (repertoire, emitter_state, metrics, random_key,) = update_fn(
             repertoire,
             emitter_state,
             random_key,
@@ -121,7 +124,9 @@ def run_me() -> None:
         # vmin=-0.2,
         # vmax=0.0,
     )
-    plt.savefig("results/repertoire.png")
+    save_folder = Path("outcome/")
+    save_folder.mkdir(exist_ok=True, parents=True)
+    plt.savefig(save_folder / "repertoire.png")
     plt.show()
         
 

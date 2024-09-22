@@ -7,7 +7,7 @@ from pathlib import Path
 import jax.random
 from matplotlib import pyplot as plt
 
-from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
+from kheperax.tasks.target_task import TargetKheperaxConfig, TargetKheperaxTask
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -28,12 +28,7 @@ def example_usage_render():
     random_key, subkey = jax.random.split(subkey)
     init_state = env.reset(subkey)
 
-    # print(init_state.obs)
-    print(init_state.robot.posture)
-
     img = env.render(init_state)
-    # print(img.shape)
-    # print(img)
 
     plt.imshow(img, origin='lower')
     plt.xticks([])
@@ -41,7 +36,7 @@ def example_usage_render():
 
     folder_save = Path('output')
     folder_save.mkdir(exist_ok=True, parents=True)
-    file_name = folder_save / "maze.png"
+    file_name = folder_save / "maze_target.png"
     plt.savefig(file_name)
     print("Saved file:", file_name)
 

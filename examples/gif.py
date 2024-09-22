@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # Remove FutureWarning
 import warnings
+from pathlib import Path
 
 import imageio
 import jax.random
@@ -9,7 +10,7 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 from kheperax.tasks.quad_task import QuadKheperaxConfig
-from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
+from kheperax.tasks.target_task import TargetKheperaxConfig, TargetKheperaxTask
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -44,7 +45,7 @@ def example_usage_gif(map_name='standard'):
     base_image = env.create_image(state)
 
     episode_length = config_kheperax.episode_length
-    episode_length = 10  # debug
+    # episode_length = 10  # debug
     for _ in tqdm(range(episode_length)):
         # Render
         image = env.add_robot(base_image, state)
@@ -58,8 +59,11 @@ def example_usage_gif(map_name='standard'):
     # Make GIF
     fps = 30
     duration = 1000 / fps
+
+    folder = Path("output/")
+    folder.mkdir(exist_ok=True, parents=True)
     imageio.mimsave(
-        "results/kheperax.gif",
+        folder / "kheperax.gif",
         rollout,
         duration=duration,
         loop=0,

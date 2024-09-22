@@ -19,7 +19,7 @@ from qdax.custom_types import (
 
 from kheperax.tasks.main_task import KheperaxConfig, KheperaxState
 from kheperax.utils.env_utils import TypeFixerWrapper, EpisodeWrapper, Env
-from kheperax.tasks.target import TargetKheperaxTask
+from kheperax.tasks.target_task import TargetKheperaxTask
 
 
 def make_final_policy_network_play_step_fn_brax(  # TODO: ?

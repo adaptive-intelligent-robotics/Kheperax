@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 
 from kheperax.tasks.maps import KHERPERAX_MAZES
 from kheperax.tasks.quad_task import QuadKheperaxConfig
-from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
+from kheperax.tasks.target_task import TargetKheperaxConfig, TargetKheperaxTask
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
@@ -29,12 +29,7 @@ def example_usage_render(map_name='standard'):
     random_key, subkey = jax.random.split(subkey)
     init_state = env.reset(subkey)
 
-    # print(init_state.obs)
-    print(init_state.robot.posture)
-
     img = env.render(init_state)
-    # print(img.shape)
-    # print(img)
 
     plt.imshow(img, origin='lower')
     plt.xticks([])
@@ -62,12 +57,7 @@ def quad_maps_render(map_name='standard'):
     random_key, subkey = jax.random.split(subkey)
     init_state = env.reset(subkey)
 
-    # print(init_state.obs)
-    print(init_state.robot.posture)
-
     img = env.render(init_state)
-    # print(img.shape)
-    # print(img)
 
     plt.imshow(img, origin='lower')
     plt.xticks([])

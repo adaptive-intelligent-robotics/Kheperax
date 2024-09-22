@@ -3,11 +3,11 @@ from typing import List
 import dataclasses
 
 from kheperax.simu_components.geoms import Pos, Segment
-from kheperax.maps import KHERPERAX_MAZES
+from kheperax.tasks.maps import KHERPERAX_MAZES
 from kheperax.simu_components.maze import Maze
 from kheperax.simu_components.posture import Posture
 from kheperax.simu_components.robot import Robot
-from kheperax.tasks.target import TargetKheperaxConfig, DEFAULT_RESOLUTION
+from kheperax.tasks.target_task import TargetKheperaxConfig, DEFAULT_RESOLUTION
 
 
 def flip_segment(segment: Segment, flip_x: bool, flip_y: bool) -> Segment:
