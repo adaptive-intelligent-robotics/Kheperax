@@ -1,4 +1,3 @@
-import brax.v1.envs
 import dataclasses
 import jax
 import numpy as np
@@ -15,7 +14,7 @@ from kheperax.simu_components.maze import Maze
 from kheperax.utils.rendering_tools import RenderingTools
 from kheperax.simu_components.robot import Robot
 from kheperax.tasks.main_task import KheperaxConfig, KheperaxTask, KheperaxState
-from kheperax.utils.type_fixer_wrapper import TypeFixerWrapper
+from kheperax.utils.env_utils import TypeFixerWrapper, EpisodeWrapper
 
 DEFAULT_RESOLUTION = (1024, 1024)
 
@@ -56,7 +55,7 @@ class TargetKheperaxTask(KheperaxTask):
                             ):
 
         env = cls(kheperax_config)
-        env = brax.v1.envs.wrappers.EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
+        env = EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
         env = TypeFixerWrapper(env)
 
         # Init policy network

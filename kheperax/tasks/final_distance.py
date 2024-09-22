@@ -1,6 +1,5 @@
 import jax
 from jax import numpy as jnp
-import brax.v1.envs
 import flax.linen as nn
 from typing import Callable, Tuple
 
@@ -19,12 +18,12 @@ from qdax.custom_types import (
 
 
 from kheperax.tasks.main_task import KheperaxConfig, KheperaxState
-from kheperax.utils.type_fixer_wrapper import TypeFixerWrapper
+from kheperax.utils.env_utils import TypeFixerWrapper, EpisodeWrapper, Env
 from kheperax.tasks.target import TargetKheperaxTask
 
 
 def make_final_policy_network_play_step_fn_brax(  # TODO: ?
-    env: brax.v1.envs.Env,
+    env: Env,
     policy_network: nn.Module,
 ) -> Callable[
     [EnvState, Params, RNGKey], Tuple[EnvState, Params, RNGKey, QDTransition]
@@ -109,8 +108,7 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
                             random_key,
                             ):
         env = cls(kheperax_config)
-        print(type(env))
-        env = brax.v1.envs.wrappers.EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
+        env = EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
         env = TypeFixerWrapper(env)
 
         # Init policy network

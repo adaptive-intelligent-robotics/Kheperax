@@ -2,11 +2,9 @@ from __future__ import annotations
 
 from typing import List, Tuple, Dict, Any
 
-import brax.v1.envs
 import dataclasses
 import flax.struct
 import jax.tree_util
-from brax.v1.envs import Env
 from jax import numpy as jnp
 from qdax.core.neuroevolution.networks.networks import MLP
 from qdax.custom_types import RNGKey
@@ -18,7 +16,7 @@ from qdax.tasks.brax_envs import create_brax_scoring_fn
 from kheperax.simu_components.maze import Maze
 from kheperax.simu_components.robot import Robot
 from kheperax.utils.rendering_tools import RenderingTools
-from kheperax.utils.type_fixer_wrapper import TypeFixerWrapper
+from kheperax.utils.env_utils import TypeFixerWrapper, EpisodeWrapper, Env
 
 
 @dataclasses.dataclass
@@ -61,9 +59,8 @@ class KheperaxState(flax.struct.PyTreeNode):
 
 
 class KheperaxTask(Env):
-    def __init__(self, kheperax_config: KheperaxConfig, **kwargs):
+    def __init__(self, kheperax_config: KheperaxConfig, **_):
         self.kheperax_config = kheperax_config
-        super().__init__(None, **kwargs)
 
     @classmethod
     def create_default_task(cls,
@@ -71,7 +68,7 @@ class KheperaxTask(Env):
                             random_key,
                             ):
         env = cls(kheperax_config)
-        env = brax.v1.envs.wrappers.EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
+        env = EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
         env = TypeFixerWrapper(env)
 
         # Init policy network
