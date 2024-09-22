@@ -7,7 +7,7 @@ import jax.random
 from matplotlib import pyplot as plt
 
 from kheperax.envs.maze_maps import TARGET_KHEPERAX_MAZES
-from kheperax.tasks.quad import QuadKheperaxConfig
+from kheperax.tasks.quad import QuadKheperaxConfig, make_quad_config
 from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -46,7 +46,7 @@ def quad_maps_render(map_name='standard'):
 
     random_key, subkey = jax.random.split(random_key)
 
-    task_config = QuadKheperaxConfig.get_default_for_map(map_name)
+    task_config = make_quad_config(TargetKheperaxConfig.get_default_for_map(map_name))
     task_config.resolution = (1024, 1024)
 
     env, policy_network, scoring_fn = TargetKheperaxTask.create_default_task(

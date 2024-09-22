@@ -1,11 +1,14 @@
 import dataclasses
-from typing import List
+from typing import List, TypeVar
 
+import jax
+import jax.numpy as jnp
+
+from kheperax.envs.maze_maps import get_target_maze_map, TargetMazeMap
 from kheperax.simu.geoms import Pos, Segment
 from kheperax.simu.maze import Maze
 from kheperax.simu.posture import Posture
-from kheperax.simu.robot import Robot
-from kheperax.envs.maze_maps import get_target_maze_map, TargetMazeMap
+from kheperax.tasks.main import KheperaxConfig
 from kheperax.tasks.target import TargetKheperaxConfig
 
 
@@ -34,8 +37,52 @@ def flip_map(maze_map: TargetMazeMap, flip_x: bool, flip_y: bool) -> List[Segmen
     return segments
 
 
+T_KheperaxConfig = TypeVar("T_KheperaxConfig", bound=KheperaxConfig)
+
+
+def make_quad_config(kheperax_config: T_KheperaxConfig) -> T_KheperaxConfig:
+    """
+    Convert a KheperaxConfig to a
+    Args:
+        kheperax_config:
+
+    Returns:
+
+    """
+    inside_walls = kheperax_config.maze.inside_walls
+    new_limits = ((-1., -1.), (1., 1.))
+
+    # Flip the map in all possible ways
+    all_segments_with_flipped = []
+    for flip_x in [False, True]:
+        for flip_y in [False, True]:
+            all_segments_with_flipped.append(flip_segment(inside_walls, flip_x=flip_x, flip_y=flip_y))
+    all_segments_with_flipped = jax.tree_util.tree_map(lambda *x: jnp.concatenate(x), *all_segments_with_flipped)
+
+    new_maze = Maze(
+        inside_walls=all_segments_with_flipped,
+        border_walls=Maze.make_border_walls(new_limits)
+    )
+
+    # Robot starts in the middle
+    new_robot = kheperax_config.robot
+    new_robot = new_robot.replace(
+        posture=Posture(0., 0., new_robot.posture.angle)
+    )
+
+    return dataclasses.replace(kheperax_config,
+                               maze=new_maze,
+                               robot=new_robot,
+                               limits=new_limits,
+                               )
+
+
 @dataclasses.dataclass
 class QuadKheperaxConfig(TargetKheperaxConfig):
+    @classmethod
+    def get_default(cls):
+        return cls.get_default_for_map("standard")
+
     @classmethod
     def get_default_for_map(cls, map_name):
         parent_config = TargetKheperaxConfig.get_default_for_map(map_name)

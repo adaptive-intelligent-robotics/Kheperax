@@ -9,7 +9,7 @@ import jax.random
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from kheperax.tasks.quad import QuadKheperaxConfig
+from kheperax.tasks.quad import QuadKheperaxConfig, make_quad_config
 from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -25,7 +25,7 @@ def example_usage_gif(map_name='standard'):
     # Define Task configuration
     if "quad_" in map_name:
         base_map_name = map_name.replace("quad_", "")
-        config_kheperax = QuadKheperaxConfig.get_default_for_map(base_map_name)
+        config_kheperax = make_quad_config(TargetKheperaxConfig.get_default_for_map(base_map_name))
     else:
         config_kheperax = TargetKheperaxConfig.get_default_for_map(map_name)
 

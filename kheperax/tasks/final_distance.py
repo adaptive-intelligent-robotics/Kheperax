@@ -17,7 +17,7 @@ from kheperax.tasks.target import TargetKheperaxTask, TargetKheperaxConfig
 from kheperax.envs.scoring import get_final_state_desc, create_kheperax_scoring_fn
 
 
-def make_final_policy_network_play_step_fn_brax(  # TODO: ?
+def make_final_policy_network_play_step_fn(  # TODO: ?
     env: Env,
     policy_network: nn.Module,
 ) -> Callable[
@@ -116,7 +116,7 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
 
         bd_extraction_fn = get_final_state_desc
 
-        play_step_fn = make_final_policy_network_play_step_fn_brax(
+        play_step_fn = make_final_policy_network_play_step_fn(
             env,
             policy_network,
         )

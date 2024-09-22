@@ -20,7 +20,7 @@ from qdax.utils.plotting import plot_2d_map_elites_repertoire, plot_map_elites_r
 from tqdm import tqdm
 
 from kheperax.tasks.final_distance import FinalDistKheperaxTask
-from kheperax.tasks.quad import QuadKheperaxConfig
+from kheperax.tasks.quad import QuadKheperaxConfig, make_quad_config
 from kheperax.tasks.target import TargetKheperaxConfig
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -47,7 +47,7 @@ def run_me(map_name='standard') -> None:
     # Define Task configuration
     if "quad_" in map_name:
         base_map_name = map_name.replace("quad_", "")
-        config_kheperax = QuadKheperaxConfig.get_default_for_map(base_map_name)
+        config_kheperax = make_quad_config(TargetKheperaxConfig.get_default_for_map(base_map_name))
     else:
         config_kheperax = TargetKheperaxConfig.get_default_for_map(map_name)
     config_kheperax.episode_length = episode_length

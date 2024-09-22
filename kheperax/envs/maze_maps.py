@@ -69,10 +69,8 @@ register_target_maze(
                  Segment(Pos(left_wall, 0.0), Pos(left_wall, 0.8)),  # left wall
                  Segment(Pos(0.0, 0.2), Pos(0.0, 1.0)),  # Left wall for quad
                  Segment(Pos(0.2, 0.0), Pos(1., 0.0)),  # bottom wall
-             ] + [
-                 Segment(Pos(left_wall, y), Pos(start_left_max_x, y)) for y in start_left_y  # walls starting left
-             ] + [
-                 Segment(Pos(start_right_min_x, y), Pos(1.0, y)) for y in start_right_y  # walls starting right
+                 *[Segment(Pos(left_wall, y), Pos(start_left_max_x, y)) for y in start_left_y],  # walls starting left
+                 *[Segment(Pos(start_right_min_x, y), Pos(1.0, y)) for y in start_right_y],  # walls starting right
              ],
     target_pos=(0.9, 0.1),
     target_radius=0.05,

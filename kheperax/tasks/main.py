@@ -200,7 +200,7 @@ class KheperaxTask(Env):
         # WARNING: only consider the maze is in the unit square
         coeff_triangle = 3.
         image = jnp.zeros(self.kheperax_config.resolution, dtype=jnp.float32)
-        image = RenderingTools.place_triangle(image,
+        image = RenderingTools.place_triangle(self.kheperax_config, image,
                                               point_1=(
                                                   state.robot.posture.x + coeff_triangle * state.robot.radius * jnp.cos(
                                                       state.robot.posture.angle),
@@ -216,7 +216,7 @@ class KheperaxTask(Env):
                                                            state.robot.posture.angle + jnp.pi / 2)),
                                               value=2.)
 
-        image = RenderingTools.place_circle(image,
+        image = RenderingTools.place_circle(self.kheperax_config, image,
                                             center=(state.robot.posture.x, state.robot.posture.y),
                                             radius=state.robot.radius,
                                             value=1.)
@@ -230,7 +230,7 @@ class KheperaxTask(Env):
         yellow = jnp.array([1., 1., 0.])
         black = jnp.array([0., 0., 0.])
 
-        image = RenderingTools.place_segments(image,
+        image = RenderingTools.place_segments(self.kheperax_config, image,
                                               state.maze.walls,
                                               value=5.)
 

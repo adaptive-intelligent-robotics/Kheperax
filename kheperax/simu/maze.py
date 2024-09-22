@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from typing import List, Tuple
 
 import flax.struct
@@ -10,7 +11,41 @@ from kheperax.simu.geoms import Segment, Pos
 
 
 class Maze(flax.struct.PyTreeNode):
-    walls: Segment
+    inside_walls: Segment
+    border_walls: Segment
+
+    @property
+    def walls(self) -> Segment:
+        return jax.tree_util.tree_map(
+            lambda x, y: jnp.concatenate([x, y]), self.inside_walls, self.border_walls
+        )
+
+    @classmethod
+    def make_border_walls(cls,
+                          limits: Tuple[Tuple[float, float], Tuple[float, float]] = None,
+                          ) -> Segment:
+        if limits is None:
+            limits = ((0., 0.), (1., 1.))
+
+        (min_x, min_y), (max_x, max_y) = limits
+
+        border_walls = []
+
+        # bottom border
+        border_walls.append(Segment(Pos(min_x, min_y), Pos(max_x, min_y)))
+        # left border
+        border_walls.append(Segment(Pos(min_x, min_y), Pos(min_x, max_y)))
+        # top border
+        border_walls.append(Segment(Pos(min_x, max_y), Pos(max_x, max_y)))
+        # right border
+        border_walls.append(Segment(Pos(max_x, max_y), Pos(max_x, min_y)))
+
+        border_walls = jax.tree_util.tree_map(
+            lambda *x: jnp.asarray(x, dtype=jnp.float32), *border_walls
+        )
+
+        return border_walls
+
 
     @classmethod
     def create(
@@ -30,37 +65,16 @@ class Maze(flax.struct.PyTreeNode):
         """
         if segments_list is None:
             segments_list = []
+        else:
+            segments_list = copy.deepcopy(segments_list)
+
         if limits is None:
             limits = ((0., 0.), (1., 1.))
-        (min_x, min_y), (max_x, max_y) = limits
 
-        # bottom border
-        segments_list.append(Segment(Pos(min_x, min_y), Pos(max_x, min_y)))
-        # left border
-        segments_list.append(Segment(Pos(min_x, min_y), Pos(min_x, max_y)))
-        # top border
-        segments_list.append(Segment(Pos(min_x, max_y), Pos(max_x, max_y)))
-        # right border
-        segments_list.append(Segment(Pos(max_x, max_y), Pos(max_x, min_y)))
+        border_walls = cls.make_border_walls(limits=limits)
 
-        walls = jax.tree_util.tree_map(
+        inside_walls = jax.tree_util.tree_map(
             lambda *x: jnp.asarray(x, dtype=jnp.float32), *segments_list
         )
 
-        return Maze(walls)
-
-    @classmethod
-    def create_default_maze(cls):
-        """
-        Create a default hard-maze, from the original Novelty Search paper
-        https://www.cs.swarthmore.edu/~meeden/DevelopmentalRobotics/lehman_ecj11.pdf
-        """
-        return cls.create(segments_list=[
-            Segment(Pos(0.25, 0.25), Pos(0.25, 0.75)),
-            Segment(Pos(0.14, 0.45), Pos(0., 0.65)),
-            Segment(Pos(0.25, 0.75), Pos(0., 0.8)),
-            Segment(Pos(0.25, 0.75), Pos(0.66, 0.875)),
-            Segment(Pos(0.355, 0.), Pos(0.525, 0.185)),
-            Segment(Pos(0.25, 0.5), Pos(0.75, 0.215)),
-            Segment(Pos(1., 0.25), Pos(0.435, 0.55)),
-        ])
+        return Maze(inside_walls=inside_walls, border_walls=border_walls)
