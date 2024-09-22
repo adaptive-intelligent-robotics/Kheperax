@@ -4,9 +4,6 @@ import flax.linen as nn
 from typing import Callable, Tuple
 
 from qdax.tasks.brax_envs import create_brax_scoring_fn
-from qdax.environments.bd_extractors import (
-    get_final_xy_position,
-)
 
 from qdax.core.neuroevolution.buffers.buffer import QDTransition
 from qdax.core.neuroevolution.networks.networks import MLP
@@ -17,9 +14,11 @@ from qdax.custom_types import (
 )
 
 
-from kheperax.tasks.main_task import KheperaxConfig, KheperaxState
+from kheperax.tasks.main import KheperaxConfig
+from kheperax.envs.kheperax_state import KheperaxState
 from kheperax.utils.env_utils import TypeFixerWrapper, EpisodeWrapper, Env
-from kheperax.tasks.target_task import TargetKheperaxTask
+from kheperax.tasks.target import TargetKheperaxTask
+from kheperax.utils.scoring_utils import get_final_state_desc
 
 
 def make_final_policy_network_play_step_fn_brax(  # TODO: ?
@@ -119,7 +118,7 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
             final_activation=jnp.tanh,
         )
 
-        bd_extraction_fn = get_final_xy_position
+        bd_extraction_fn = get_final_state_desc
 
         play_step_fn = make_final_policy_network_play_step_fn_brax(
             env,

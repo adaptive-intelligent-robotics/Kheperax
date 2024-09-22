@@ -7,7 +7,7 @@ from pathlib import Path
 import jax.random
 from matplotlib import pyplot as plt
 
-from kheperax.tasks.target_task import TargetKheperaxConfig, TargetKheperaxTask
+from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 

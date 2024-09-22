@@ -5,8 +5,8 @@ from kheperax.simu_components.geoms import Pos, Segment
 from kheperax.simu_components.maze import Maze
 from kheperax.simu_components.posture import Posture
 from kheperax.simu_components.robot import Robot
-from kheperax.tasks.maze_maps import get_target_maze_map, TargetMazeMap
-from kheperax.tasks.target_task import TargetKheperaxConfig, DEFAULT_RESOLUTION
+from kheperax.envs.maze_maps import get_target_maze_map, TargetMazeMap
+from kheperax.tasks.target import TargetKheperaxConfig
 
 
 def flip_segment(segment: Segment, flip_x: bool, flip_y: bool) -> Segment:

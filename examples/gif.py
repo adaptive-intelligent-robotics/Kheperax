@@ -9,8 +9,8 @@ import jax.random
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from kheperax.tasks.quad_task import QuadKheperaxConfig
-from kheperax.tasks.target_task import TargetKheperaxConfig, TargetKheperaxTask
+from kheperax.tasks.quad import QuadKheperaxConfig
+from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 

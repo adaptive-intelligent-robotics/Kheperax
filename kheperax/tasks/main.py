@@ -1,24 +1,19 @@
 from __future__ import annotations
 
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple
 
 import dataclasses
-import flax.struct
 import jax.tree_util
 from jax import numpy as jnp
 from qdax.core.neuroevolution.networks.networks import MLP
-from qdax.custom_types import RNGKey
-from qdax.environments.bd_extractors import (
-    get_final_xy_position,
-)
-from qdax.tasks.brax_envs import create_brax_scoring_fn
 
 from kheperax.simu_components.maze import Maze
 from kheperax.simu_components.robot import Robot
-from kheperax.tasks.maze_maps import get_target_maze_map
+from kheperax.envs.maze_maps import get_target_maze_map
+from kheperax.envs.kheperax_state import KheperaxState
 from kheperax.utils.rendering_tools import RenderingTools
 from kheperax.utils.env_utils import TypeFixerWrapper, EpisodeWrapper, Env
-
+from kheperax.utils.scoring_utils import create_kheperax_scoring_fn, get_final_state_desc
 
 DEFAULT_RESOLUTION = (1024, 1024)
 
@@ -33,6 +28,7 @@ class KheperaxConfig:
     std_noise_wheel_velocities: float
     resolution: Tuple[int, int]
     limits: Tuple[List[float], List[float]]
+    action_repeat: int
 
     @classmethod
     def get_default(cls):
@@ -51,25 +47,12 @@ class KheperaxConfig:
             ),
             robot=Robot.create_default_robot(),
             std_noise_wheel_velocities=0.0,
-            limits=([0., 0.], [1., 1.])
+            limits=([0., 0.], [1., 1.]),
+            action_repeat=1,
         )
 
     def to_dict(self):
         return {field.name: getattr(self, field.name) for field in dataclasses.fields(self)}
-
-
-class KheperaxState(flax.struct.PyTreeNode):
-    """
-    Environment state for training and inference.
-    """
-    robot: Robot
-    maze: Maze
-    obs: jnp.ndarray
-    reward: jnp.ndarray
-    done: jnp.ndarray
-    random_key: RNGKey
-    metrics: Dict[str, jnp.ndarray] = flax.struct.field(default_factory=dict)
-    info: Dict[str, Any] = flax.struct.field(default_factory=dict)
 
 
 class KheperaxTask(Env):
@@ -82,7 +65,7 @@ class KheperaxTask(Env):
                             random_key,
                             ):
         env = cls(kheperax_config)
-        env = EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
+        env = EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=kheperax_config.action_repeat)
         env = TypeFixerWrapper(env)
 
         # Init policy network
@@ -93,13 +76,12 @@ class KheperaxTask(Env):
             final_activation=jnp.tanh,
         )
 
-        bd_extraction_fn = get_final_xy_position
+        bd_extraction_fn = get_final_state_desc
 
-        scoring_fn, random_key = create_brax_scoring_fn(
+        scoring_fn = create_kheperax_scoring_fn(
             env,
             policy_network,
             bd_extraction_fn,
-            random_key,
             episode_length=kheperax_config.episode_length,
         )
 

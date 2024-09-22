@@ -4,18 +4,19 @@ import abc
 
 import jax
 import jax.numpy as jnp
-from qdax.custom_types import EnvState
+
+from kheperax.envs.kheperax_state import KheperaxState
 
 
 class Env(abc.ABC):
     """API for driving an agent."""
 
     @abc.abstractmethod
-    def reset(self, rng: jnp.ndarray) -> EnvState:
+    def reset(self, rng: jnp.ndarray) -> KheperaxState:
         """Resets the environment to an initial state."""
 
     @abc.abstractmethod
-    def step(self, state: EnvState, action: jnp.ndarray) -> EnvState:
+    def step(self, state: KheperaxState, action: jnp.ndarray) -> KheperaxState:
         """Run one timestep of the environment's dynamics."""
 
     @property
@@ -41,10 +42,10 @@ class Wrapper(Env):
     def __init__(self, env: Env):
         self.env = env
 
-    def reset(self, rng: jnp.ndarray) -> EnvState:
+    def reset(self, rng: jnp.ndarray) -> KheperaxState:
         return self.env.reset(rng)
 
-    def step(self, state: EnvState, action: jnp.ndarray) -> EnvState:
+    def step(self, state: KheperaxState, action: jnp.ndarray) -> KheperaxState:
         return self.env.step(state, action)
 
     @property
@@ -74,13 +75,13 @@ class EpisodeWrapper(Wrapper):
         self.episode_length = episode_length
         self.action_repeat = action_repeat
 
-    def reset(self, rng: jnp.ndarray) -> EnvState:
+    def reset(self, rng: jnp.ndarray) -> KheperaxState:
         state = self.env.reset(rng)
         state.info['steps'] = jnp.zeros(rng.shape[:-1])
         state.info['truncation'] = jnp.zeros(rng.shape[:-1])
         return state
 
-    def step(self, state: EnvState, action: jnp.ndarray) -> EnvState:
+    def step(self, state: KheperaxState, action: jnp.ndarray) -> KheperaxState:
         def f(state, _):
             nstate = self.env.step(state, action)
             return nstate, nstate.reward

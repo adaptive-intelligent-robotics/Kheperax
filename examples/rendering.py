@@ -5,7 +5,7 @@ from pathlib import Path
 import jax.random
 from matplotlib import pyplot as plt
 
-from kheperax.tasks.main_task import KheperaxConfig, KheperaxTask
+from kheperax.tasks.main import KheperaxConfig, KheperaxTask
 
 
 def example_usage_render():

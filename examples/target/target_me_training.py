@@ -18,7 +18,7 @@ from qdax.utils.metrics import default_qd_metrics
 from qdax.utils.plotting import plot_2d_map_elites_repertoire, plot_map_elites_results
 from tqdm import tqdm
 
-from kheperax.tasks.target_task import TargetKheperaxConfig, TargetKheperaxTask
+from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 

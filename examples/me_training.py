@@ -18,7 +18,7 @@ from qdax.core.map_elites import MAPElites
 from qdax.utils.metrics import default_qd_metrics
 from qdax.utils.plotting import plot_2d_map_elites_repertoire
 
-from kheperax.tasks.main_task import KheperaxTask, KheperaxConfig
+from kheperax.tasks.main import KheperaxTask, KheperaxConfig
 
 
 def run_me() -> None:

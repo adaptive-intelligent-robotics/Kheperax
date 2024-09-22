@@ -4,18 +4,14 @@ import jax
 import numpy as np
 from jax import numpy as jnp
 from qdax.core.neuroevolution.networks.networks import MLP
-from qdax.environments.bd_extractors import (
-    get_final_xy_position,
-)
-from qdax.tasks.brax_envs import create_brax_scoring_fn
 
 from kheperax.simu_components.geoms import Segment, Pos
-from kheperax.simu_components.maze import Maze
-from kheperax.simu_components.robot import Robot
-from kheperax.tasks.main_task import KheperaxConfig, KheperaxTask, KheperaxState, DEFAULT_RESOLUTION
-from kheperax.tasks.maze_maps import get_target_maze_map
+from kheperax.tasks.main import KheperaxConfig, KheperaxTask
+from kheperax.envs.maze_maps import get_target_maze_map
+from kheperax.envs.kheperax_state import KheperaxState
 from kheperax.utils.env_utils import TypeFixerWrapper, EpisodeWrapper
 from kheperax.utils.rendering_tools import RenderingTools
+from kheperax.utils.scoring_utils import create_kheperax_scoring_fn, get_final_state_desc
 
 
 @dataclasses.dataclass
@@ -43,7 +39,7 @@ class TargetKheperaxConfig(KheperaxConfig):
 class TargetKheperaxTask(KheperaxTask):
     @classmethod
     def create_default_task(cls,
-                            kheperax_config: KheperaxConfig,
+                            kheperax_config: TargetKheperaxConfig,
                             random_key,
                             ):
 
@@ -59,13 +55,12 @@ class TargetKheperaxTask(KheperaxTask):
             final_activation=jnp.tanh,
         )
 
-        bd_extraction_fn = get_final_xy_position
+        bd_extraction_fn = get_final_state_desc
 
-        scoring_fn, random_key = create_brax_scoring_fn(
+        scoring_fn = create_kheperax_scoring_fn(
             env,
             policy_network,
             bd_extraction_fn,
-            random_key,
             episode_length=kheperax_config.episode_length,
         )
 
