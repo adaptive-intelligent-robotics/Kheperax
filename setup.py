@@ -2,7 +2,7 @@ import os
 
 from setuptools import find_packages, setup
 
-from qdax import __version__
+from kheperax import __version__
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -15,7 +15,7 @@ setup(
     packages=find_packages(),
     url="https://github.com/adaptive-intelligent-robotics/Kheperax",
     license="MIT",
-    author="Luca Grillotti",
+    author="Luca Grillotti and Paul Templier",
     author_email="luca.grillotti16@imperial.ac.uk",
     description="A-maze-ing environment in jax",
     long_description=long_description,
@@ -44,7 +44,9 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: POSIX :: Linux",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
 )
