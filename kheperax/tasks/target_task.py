@@ -1,4 +1,5 @@
 import dataclasses
+
 import jax
 import numpy as np
 from jax import numpy as jnp
@@ -9,14 +10,12 @@ from qdax.environments.bd_extractors import (
 from qdax.tasks.brax_envs import create_brax_scoring_fn
 
 from kheperax.simu_components.geoms import Segment, Pos
-from kheperax.tasks.maps import KHERPERAX_MAZES
 from kheperax.simu_components.maze import Maze
-from kheperax.utils.rendering_tools import RenderingTools
 from kheperax.simu_components.robot import Robot
-from kheperax.tasks.main_task import KheperaxConfig, KheperaxTask, KheperaxState
+from kheperax.tasks.main_task import KheperaxConfig, KheperaxTask, KheperaxState, DEFAULT_RESOLUTION
+from kheperax.tasks.maze_maps import get_target_maze_map
 from kheperax.utils.env_utils import TypeFixerWrapper, EpisodeWrapper
-
-DEFAULT_RESOLUTION = (1024, 1024)
+from kheperax.utils.rendering_tools import RenderingTools
 
 
 @dataclasses.dataclass
@@ -26,24 +25,18 @@ class TargetKheperaxConfig(KheperaxConfig):
 
     @classmethod
     def get_default(cls):
-        return cls.get_map("standard")
+        return cls.get_default_for_map("standard")
 
     @classmethod
-    def get_map(cls, map_name):
-        maze_map = KHERPERAX_MAZES[map_name]
+    def get_default_for_map(cls, map_name):
+        maze_map = get_target_maze_map(map_name)
+        parent_config = KheperaxConfig.get_default_for_map(map_name)
+
         return cls(
-            episode_length=1000,
-            mlp_policy_hidden_layer_sizes=(8,),
-            resolution=DEFAULT_RESOLUTION,
-            action_scale=0.025,
-            maze=Maze.create(
-                segments_list=maze_map["segments"]
-            ),
-            robot=Robot.create_default_robot(),
-            std_noise_wheel_velocities=0.0,
-            target_pos=maze_map["target_pos"],
-            target_radius=maze_map["target_radius"],
-            limits=([0., 0.], [1., 1.])
+            **parent_config.to_dict(),
+
+            target_pos=maze_map.target_pos,
+            target_radius=maze_map.target_radius,
         )
 
 

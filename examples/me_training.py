@@ -124,7 +124,7 @@ def run_me() -> None:
         # vmin=-0.2,
         # vmax=0.0,
     )
-    save_folder = Path("outcome/")
+    save_folder = Path("output/")
     save_folder.mkdir(exist_ok=True, parents=True)
     plt.savefig(save_folder / "repertoire.png")
     plt.show()

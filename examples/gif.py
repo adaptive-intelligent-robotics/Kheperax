@@ -25,9 +25,9 @@ def example_usage_gif(map_name='standard'):
     # Define Task configuration
     if "quad_" in map_name:
         base_map_name = map_name.replace("quad_", "")
-        config_kheperax = QuadKheperaxConfig.get_map(base_map_name)
+        config_kheperax = QuadKheperaxConfig.get_default_for_map(base_map_name)
     else:
-        config_kheperax = TargetKheperaxConfig.get_map(map_name)
+        config_kheperax = TargetKheperaxConfig.get_default_for_map(map_name)
 
     env, policy_network, scoring_fn = TargetKheperaxTask.create_default_task(
         kheperax_config=config_kheperax,

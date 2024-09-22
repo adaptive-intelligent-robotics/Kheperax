@@ -6,6 +6,7 @@ import functools
 import warnings  # Remove FutureWarning
 from pathlib import Path
 
+import imageio
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
@@ -23,7 +24,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 def run_me(map_name='standard') -> None:
-    print(f"Running ME on {map_name}")
+    print(f"Running MAP-Elites on {map_name} with target")
     seed = 42
     batch_size = 128
     num_evaluations = int(5e4)
@@ -39,7 +40,7 @@ def run_me(map_name='standard') -> None:
     random_key, subkey = jax.random.split(random_key)
 
     # Define Task configuration
-    config_kheperax = TargetKheperaxConfig.get_map(map_name)
+    config_kheperax = TargetKheperaxConfig.get_default_for_map(map_name)
     config_kheperax.mlp_policy_hidden_layer_sizes = mlp_policy_hidden_layer_sizes
 
     episode_length = config_kheperax.episode_length
@@ -132,7 +133,7 @@ def run_me(map_name='standard') -> None:
         # vmin=-0.2,
         # vmax=0.0,
     )
-    save_folder = Path("outcome/")
+    save_folder = Path("output/")
     save_folder.mkdir(exist_ok=True, parents=True)
     plt.savefig(save_folder / "target_repertoire.png")
     # plt.show()
@@ -177,7 +178,6 @@ def run_me(map_name='standard') -> None:
         state = jit_env_step(state, action)
 
     # Make GIF
-    import imageio
     fps = 30
     duration = 1000 / fps
     name_file = f"target_policy_{map_name}.gif"
@@ -186,8 +186,8 @@ def run_me(map_name='standard') -> None:
 
 
 def run_example():
-    # map_name='standard'
-    map_name = 'pointmaze'
+    map_name='standard'
+    # map_name = 'pointmaze'
 
     # matplotlib backend agg for headless mode
     plt.switch_backend("agg")

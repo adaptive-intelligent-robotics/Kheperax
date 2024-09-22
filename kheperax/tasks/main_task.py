@@ -15,8 +15,12 @@ from qdax.tasks.brax_envs import create_brax_scoring_fn
 
 from kheperax.simu_components.maze import Maze
 from kheperax.simu_components.robot import Robot
+from kheperax.tasks.maze_maps import get_target_maze_map
 from kheperax.utils.rendering_tools import RenderingTools
 from kheperax.utils.env_utils import TypeFixerWrapper, EpisodeWrapper, Env
+
+
+DEFAULT_RESOLUTION = (1024, 1024)
 
 
 @dataclasses.dataclass
@@ -32,16 +36,26 @@ class KheperaxConfig:
 
     @classmethod
     def get_default(cls):
+        return cls.get_default_for_map("standard")
+
+    @classmethod
+    def get_default_for_map(cls, map_name):
+        maze_map = get_target_maze_map(map_name)
         return cls(
-            episode_length=250,
+            episode_length=1000,
             mlp_policy_hidden_layer_sizes=(8,),
-            resolution=(64, 64),
+            resolution=DEFAULT_RESOLUTION,
             action_scale=0.025,
-            maze=Maze.create_default_maze(),
+            maze=Maze.create(
+                segments_list=maze_map.segments
+            ),
             robot=Robot.create_default_robot(),
             std_noise_wheel_velocities=0.0,
             limits=([0., 0.], [1., 1.])
         )
+
+    def to_dict(self):
+        return {field.name: getattr(self, field.name) for field in dataclasses.fields(self)}
 
 
 class KheperaxState(flax.struct.PyTreeNode):

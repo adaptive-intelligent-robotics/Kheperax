@@ -47,9 +47,9 @@ def run_me(map_name='standard') -> None:
     # Define Task configuration
     if "quad_" in map_name:
         base_map_name = map_name.replace("quad_", "")
-        config_kheperax = QuadKheperaxConfig.get_map(base_map_name)
+        config_kheperax = QuadKheperaxConfig.get_default_for_map(base_map_name)
     else:
-        config_kheperax = TargetKheperaxConfig.get_map(map_name)
+        config_kheperax = TargetKheperaxConfig.get_default_for_map(map_name)
     config_kheperax.episode_length = episode_length
     config_kheperax.mlp_policy_hidden_layer_sizes = mlp_policy_hidden_layer_sizes
 
@@ -144,7 +144,6 @@ def run_me(map_name='standard') -> None:
     save_folder = Path("output/")
     save_folder.mkdir(exist_ok=True, parents=True)
     plt.savefig(save_folder / "final_dist_repertoire.png")
-    # plt.show()
 
     env_steps = jnp.arange(1, num_iterations + 1) * batch_size * episode_length
     fig, axes = plot_map_elites_results(

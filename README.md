@@ -84,7 +84,9 @@ You can then modify the properties of the config by directly changing its attrib
 
 
 ## Kheperax with a target
-In order to use Kheperax with a target position to reach at the end of the maze, you can use the `TargetKheperaxTask` class. The target position is set by defualt in `(0.15, 0.9)` with a radius of `0.05`. The reward at each step is defined as the negative distance to the target center, and reaching the target position ends the episode.   
+In order to use Kheperax with a target position to reach at the end of the maze, you can use the `TargetKheperaxTask` class. 
+The target position is set by default in `(0.15, 0.9)` with a radius of `0.05`. 
+The reward at each step is defined as the negative distance to the target center, and reaching the target position ends the episode.   
 Rendering the environment will then show the target position as a green circle.
 
 ![Maze with a target](results/target_maze.png)
