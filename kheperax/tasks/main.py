@@ -7,13 +7,14 @@ import jax.tree_util
 from jax import numpy as jnp
 from qdax.core.neuroevolution.networks.networks import MLP
 
-from kheperax.simu_components.maze import Maze
-from kheperax.simu_components.robot import Robot
+from kheperax.simu.maze import Maze
+from kheperax.simu.robot import Robot
 from kheperax.envs.maze_maps import get_target_maze_map
 from kheperax.envs.kheperax_state import KheperaxState
 from kheperax.utils.rendering_tools import RenderingTools
-from kheperax.utils.env_utils import TypeFixerWrapper, EpisodeWrapper, Env
-from kheperax.utils.scoring_utils import create_kheperax_scoring_fn, get_final_state_desc
+from kheperax.envs.env import Env
+from kheperax.envs.wrappers import EpisodeWrapper, TypeFixerWrapper
+from kheperax.envs.scoring import create_kheperax_scoring_fn, get_final_state_desc
 
 DEFAULT_RESOLUTION = (1024, 1024)
 
@@ -27,7 +28,7 @@ class KheperaxConfig:
     robot: Robot
     std_noise_wheel_velocities: float
     resolution: Tuple[int, int]
-    limits: Tuple[List[float], List[float]]
+    limits: Tuple[Tuple[float, float], Tuple[float, float]]
     action_repeat: int
 
     @classmethod
@@ -47,7 +48,7 @@ class KheperaxConfig:
             ),
             robot=Robot.create_default_robot(),
             std_noise_wheel_velocities=0.0,
-            limits=([0., 0.], [1., 1.]),
+            limits=((0., 0.), (1., 1.)),
             action_repeat=1,
         )
 

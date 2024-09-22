@@ -3,8 +3,6 @@
 .vscode
 last_repertoire
 *logs.csv
-.idea/
-__pycache__/
 output/
 
 # Singularity generated files
@@ -105,7 +103,6 @@ docs/_build/
 
 # PyBuilder
 .pybuilder/
-target/
 
 # Jupyter Notebook
 .ipynb_checkpoints

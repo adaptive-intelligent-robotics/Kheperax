@@ -6,7 +6,7 @@ import flax.struct
 import jax.tree_util
 from jax import numpy as jnp
 
-from kheperax.simu_components.geoms import Segment, Pos
+from kheperax.simu.geoms import Segment, Pos
 
 
 class Maze(flax.struct.PyTreeNode):

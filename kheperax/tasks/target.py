@@ -5,13 +5,13 @@ import numpy as np
 from jax import numpy as jnp
 from qdax.core.neuroevolution.networks.networks import MLP
 
-from kheperax.simu_components.geoms import Segment, Pos
+from kheperax.simu.geoms import Segment, Pos
 from kheperax.tasks.main import KheperaxConfig, KheperaxTask
 from kheperax.envs.maze_maps import get_target_maze_map
 from kheperax.envs.kheperax_state import KheperaxState
-from kheperax.utils.env_utils import TypeFixerWrapper, EpisodeWrapper
+from kheperax.envs.wrappers import EpisodeWrapper, TypeFixerWrapper
 from kheperax.utils.rendering_tools import RenderingTools
-from kheperax.utils.scoring_utils import create_kheperax_scoring_fn, get_final_state_desc
+from kheperax.envs.scoring import create_kheperax_scoring_fn, get_final_state_desc
 
 
 @dataclasses.dataclass

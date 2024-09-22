@@ -3,7 +3,7 @@ from __future__ import annotations
 import flax.struct
 import jax
 from jax import numpy as jnp
-from kheperax.simu_components.geoms import Pos, Segment
+from kheperax.simu.geoms import Pos, Segment
 
 
 class Laser(flax.struct.PyTreeNode):

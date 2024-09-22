@@ -17,7 +17,7 @@ from qdax.custom_types import (
 )
 
 from kheperax.envs.kheperax_state import KheperaxState
-from kheperax.utils.env_utils import Env
+from kheperax.envs.env import Env
 
 
 def get_final_state_desc(data: QDTransition, mask: jnp.ndarray) -> Descriptor:
@@ -222,7 +222,7 @@ def create_kheperax_scoring_fn(
     descriptor_extraction_fn: Callable[[QDTransition, jnp.ndarray], Descriptor],
     play_step_fn: Optional[
         Callable[
-            [KheperaxState, Params, RNGKey], Tuple[KheperaxState, Params, RNGKey, QDTransition]
+            [KheperaxState, Params, RNGKey], Tuple[KheperaxState, QDTransition]
         ]
     ] = None,
     episode_length: int = 1000,

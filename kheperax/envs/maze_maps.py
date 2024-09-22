@@ -1,6 +1,6 @@
 import dataclasses
 
-from kheperax.simu_components.geoms import Segment, Pos
+from kheperax.simu.geoms import Segment, Pos
 
 
 @dataclasses.dataclass

@@ -1,10 +1,10 @@
 import dataclasses
 from typing import List
 
-from kheperax.simu_components.geoms import Pos, Segment
-from kheperax.simu_components.maze import Maze
-from kheperax.simu_components.posture import Posture
-from kheperax.simu_components.robot import Robot
+from kheperax.simu.geoms import Pos, Segment
+from kheperax.simu.maze import Maze
+from kheperax.simu.posture import Posture
+from kheperax.simu.robot import Robot
 from kheperax.envs.maze_maps import get_target_maze_map, TargetMazeMap
 from kheperax.tasks.target import TargetKheperaxConfig
 
@@ -38,31 +38,34 @@ def flip_map(maze_map: TargetMazeMap, flip_x: bool, flip_y: bool) -> List[Segmen
 class QuadKheperaxConfig(TargetKheperaxConfig):
     @classmethod
     def get_default_for_map(cls, map_name):
+        parent_config = TargetKheperaxConfig.get_default_for_map(map_name)
+
         maze_map = get_target_maze_map(map_name)
-        limits = ((-1., -1.), (1., 1.))
-        segments = []
+        new_limits = ((-1., -1.), (1., 1.))
+        all_segments_with_flipped = []
         for flip_x in [False, True]:
             for flip_y in [False, True]:
-                segments += flip_map(maze_map, flip_x=flip_x, flip_y=flip_y)
+                all_segments_with_flipped += flip_map(maze_map, flip_x=flip_x, flip_y=flip_y)
 
-        robot = Robot.create_default_robot()
+        robot = parent_config.robot
         # Start in the middle
         robot = robot.replace(
             posture=Posture(0., 0., robot.posture.angle)
         )
 
         return TargetKheperaxConfig(
-            episode_length=1000,
-            mlp_policy_hidden_layer_sizes=(8,),
-            resolution=DEFAULT_RESOLUTION,
-            action_scale=0.025,
+            episode_length=parent_config.episode_length,
+            mlp_policy_hidden_layer_sizes=parent_config.mlp_policy_hidden_layer_sizes,
+            resolution=parent_config.resolution,
+            action_scale=parent_config.action_scale,
             maze=Maze.create(
-                segments_list=segments,
-                limits=limits,
+                segments_list=all_segments_with_flipped,
+                limits=new_limits,
             ),
             robot=robot,
-            std_noise_wheel_velocities=0.0,
-            target_pos=maze_map.target_pos,
-            target_radius=maze_map.target_radius,
-            limits=limits
+            std_noise_wheel_velocities=parent_config.std_noise_wheel_velocities,
+            target_pos=parent_config.target_pos,
+            target_radius=parent_config.target_radius,
+            limits=new_limits,
+            action_repeat=parent_config.action_repeat,
         )

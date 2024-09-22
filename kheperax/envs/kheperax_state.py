@@ -6,8 +6,8 @@ import flax.struct
 from jax import numpy as jnp
 from qdax.custom_types import RNGKey
 
-from kheperax.simu_components.maze import Maze
-from kheperax.simu_components.robot import Robot
+from kheperax.simu.maze import Maze
+from kheperax.simu.robot import Robot
 
 
 class KheperaxState(flax.struct.PyTreeNode):

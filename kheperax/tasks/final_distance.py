@@ -3,29 +3,25 @@ from jax import numpy as jnp
 import flax.linen as nn
 from typing import Callable, Tuple
 
-from qdax.tasks.brax_envs import create_brax_scoring_fn
-
 from qdax.core.neuroevolution.buffers.buffer import QDTransition
 from qdax.core.neuroevolution.networks.networks import MLP
 from qdax.custom_types import (
-    EnvState,
     Params,
     RNGKey,
 )
 
-
-from kheperax.tasks.main import KheperaxConfig
 from kheperax.envs.kheperax_state import KheperaxState
-from kheperax.utils.env_utils import TypeFixerWrapper, EpisodeWrapper, Env
-from kheperax.tasks.target import TargetKheperaxTask
-from kheperax.utils.scoring_utils import get_final_state_desc
+from kheperax.envs.env import Env
+from kheperax.envs.wrappers import EpisodeWrapper, TypeFixerWrapper
+from kheperax.tasks.target import TargetKheperaxTask, TargetKheperaxConfig
+from kheperax.envs.scoring import get_final_state_desc, create_kheperax_scoring_fn
 
 
 def make_final_policy_network_play_step_fn_brax(  # TODO: ?
     env: Env,
     policy_network: nn.Module,
 ) -> Callable[
-    [EnvState, Params, RNGKey], Tuple[EnvState, Params, RNGKey, QDTransition]
+    [KheperaxState, Params, RNGKey], Tuple[KheperaxState, QDTransition]
 ]:
     """
     Creates a function that when called, plays a step of the environment.
@@ -39,10 +35,10 @@ def make_final_policy_network_play_step_fn_brax(  # TODO: ?
         default_play_step_fn: A function that plays a step of the environment.
     """
     def final_play_step_fn(
-        env_state: EnvState,
+        env_state: KheperaxState,
         policy_params: Params,
-        random_key: RNGKey,
-    ) -> Tuple[EnvState, Params, RNGKey, QDTransition]:
+        key: RNGKey,
+    ) -> Tuple[KheperaxState, QDTransition]:
         """
         Play an environment step and return the updated EnvState and the transition.
 
@@ -94,7 +90,7 @@ def make_final_policy_network_play_step_fn_brax(  # TODO: ?
             next_state_desc=next_state.info["state_descriptor"],
         )
 
-        return next_state, policy_params, random_key, transition
+        return next_state, transition
 
     return final_play_step_fn
 
@@ -103,7 +99,7 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
     """Kheperax task that only rewards the final distance to the target"""
     @classmethod
     def create_default_task(cls,
-                            kheperax_config: KheperaxConfig,
+                            kheperax_config: TargetKheperaxConfig,
                             random_key,
                             ):
         env = cls(kheperax_config)
@@ -125,11 +121,10 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
             policy_network,
         )
 
-        scoring_fn, random_key = create_brax_scoring_fn(
+        scoring_fn = create_kheperax_scoring_fn(
             env,
             policy_network,
             bd_extraction_fn,
-            random_key,
             play_step_fn=play_step_fn,
             episode_length=kheperax_config.episode_length,
         )

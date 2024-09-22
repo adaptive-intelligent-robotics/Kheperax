@@ -8,10 +8,10 @@ import jax.tree_util
 from jax import numpy as jnp
 
 
-from kheperax.simu_components.geoms import Pos, Disk, Segment
-from kheperax.simu_components.laser import Laser
-from kheperax.simu_components.maze import Maze
-from kheperax.simu_components.posture import Posture
+from kheperax.simu.geoms import Pos, Disk, Segment
+from kheperax.simu.laser import Laser
+from kheperax.simu.maze import Maze
+from kheperax.simu.posture import Posture
 from kheperax.utils.tree_utils import get_batch_size
 
 
