@@ -7,7 +7,7 @@ import jax.random
 from matplotlib import pyplot as plt
 
 from kheperax.envs.maze_maps import TARGET_KHEPERAX_MAZES
-from kheperax.tasks.quad import QuadKheperaxConfig, make_quad_config
+from kheperax.tasks.quad import make_quad_config
 from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
 warnings.simplefilter(action='ignore', category=FutureWarning)

@@ -20,7 +20,7 @@ from qdax.utils.plotting import plot_2d_map_elites_repertoire, plot_map_elites_r
 from tqdm import tqdm
 
 from kheperax.tasks.final_distance import FinalDistKheperaxTask
-from kheperax.tasks.quad import QuadKheperaxConfig, make_quad_config
+from kheperax.tasks.quad import make_quad_config
 from kheperax.tasks.target import TargetKheperaxConfig
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
