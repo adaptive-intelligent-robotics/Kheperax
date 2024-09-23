@@ -220,12 +220,12 @@ def create_kheperax_scoring_fn(
     env: Env,
     policy_network: nn.Module,
     descriptor_extraction_fn: Callable[[QDTransition, jnp.ndarray], Descriptor],
+    episode_length: int,
     play_step_fn: Optional[
         Callable[
             [KheperaxState, Params, RNGKey], Tuple[KheperaxState, QDTransition]
         ]
     ] = None,
-    episode_length: int = 1000,
     reset_fn: Optional[Callable[[RNGKey], KheperaxState]] = None,
 ) -> Callable[[Genotype, RNGKey], Tuple[Fitness, Descriptor, ExtraScores]]:
     """

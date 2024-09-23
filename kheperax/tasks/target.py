@@ -178,7 +178,7 @@ class TargetKheperaxTask(KheperaxTask):
         )
         laser_measures = jnp.where(
             jnp.isclose(laser_measures, -1.),
-            robot.range_lasers,
+            robot.laser_ranges,
             laser_measures,
         )
         laser_relative_angles = robot.laser_angles

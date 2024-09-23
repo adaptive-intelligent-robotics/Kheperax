@@ -18,7 +18,7 @@ from kheperax.utils.tree_utils import get_batch_size
 class Robot(flax.struct.PyTreeNode):
     posture: Posture
     radius: float
-    range_lasers: Union[float, jnp.ndarray]
+    laser_ranges: Union[float, jnp.ndarray]
     laser_angles: jnp.ndarray
     std_noise_sensor_measures: float = flax.struct.field(pytree_node=False, default=0.)
 
@@ -30,7 +30,7 @@ class Robot(flax.struct.PyTreeNode):
         return cls(
             posture=Posture(0.15, 0.15, jnp.pi / 2),
             radius=0.015,
-            range_lasers=0.2,
+            laser_ranges=0.2,
             laser_angles=jnp.array([-jnp.pi / 4, 0, jnp.pi / 4]),
             std_noise_sensor_measures=0.,
             lasers_return_minus_one_if_out_of_range=False,
@@ -40,7 +40,7 @@ class Robot(flax.struct.PyTreeNode):
         list_lasers = []
 
         for laser_angle in self.laser_angles:
-            _laser = Laser(Pos(self.posture.x, self.posture.y), self.posture.angle + laser_angle, self.range_lasers)
+            _laser = Laser(Pos(self.posture.x, self.posture.y), self.posture.angle + laser_angle, self.laser_ranges)
             list_lasers.append(_laser)
 
         tree_lasers = jax.tree_util.tree_map(lambda *x: jnp.asarray(x, dtype=jnp.float32),

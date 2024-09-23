@@ -1,3 +1,5 @@
+from kheperax.tasks.main import KheperaxConfig
+
 # Kheperax
 
 The *Kheperax* task is a re-implementation of the [`fastsim` simulator](https://github.com/sferes2/libfastsim) from _Mouret and Doncieux (2012)_.
@@ -152,10 +154,11 @@ Kheperax supports various tasks and maze types. Here's an overview of the availa
 - **Description**: Kheperax environment with a target position for the robot to reach.
 
 #### Key Features:
-- **Target Position**: Defines a specific point in the maze for the robot to reach. Default position: (0.15, 0.9)
-- **Target Radius**: Specifies the size of the target area.
-   - Default radius: 0.05
-   - The episode ends when the robot enters this radius.
+- `TargetKheperaxConfig` contains the same parameters as `KheperaxConfig`, plus additional target-related parameters:
+  - **Target Position**: Defines a specific point in the maze for the robot to reach. Default position: `(0.15, 0.9)`
+  - **Target Radius**: Specifies the size of the target area.
+     - Default radius: 0.05
+     - The episode ends when the robot enters this radius.
 - **Reward Function**: 
    - At each step, the reward is the negative distance to the target center.
    - This encourages the robot to move towards the target.
@@ -188,6 +191,8 @@ target_task = TargetKheperaxTask(target_config)
 - **Class**: `FinalDistKheperaxTask`
 - **Description**: A task that only rewards the final distance to the target.
 
+[//]: # (Add more details about the final distance task)
+
 ### Maze Maps
 - **File**: `kheperax/envs/maze_maps.py`
 - **Description**: Defines various maze layouts, including:
@@ -198,9 +203,14 @@ target_task = TargetKheperaxTask(target_config)
 To use a specific maze map:
 
 ```python
-from kheperax.envs.maze_maps import get_target_maze_map
+from kheperax.tasks.main import KheperaxConfig
+from kheperax.tasks.target import TargetKheperaxConfig
 
-maze_map = get_target_maze_map("standard")  # or "pointmaze", "snake"
+# Get the default configuration for the desired maze map
+maze_map = KheperaxConfig.get_default_for_map("standard")  # or "pointmaze", "snake"
+
+# For target-based tasks
+target_maze_map = TargetKheperaxConfig.get_default_for_map("standard")  # or "pointmaze", "snake"
 ```
 
 [//]: # (Images of the different maze maps)
@@ -209,6 +219,22 @@ maze_map = get_target_maze_map("standard")  # or "pointmaze", "snake"
 - **File**: `kheperax/tasks/quad.py`
 - **Function**: `make_quad_config`
 - **Description**: Creates quad mazes, which are essentially four copies of the original maze flipped in different orientations.
+
+To create a quad maze configuration:
+
+```python
+from kheperax.tasks.main import KheperaxConfig
+from kheperax.tasks.target import TargetKheperaxConfig
+from kheperax.tasks.quad import make_quad_config
+
+# Get the default configuration for the desired maze map
+maze_map = KheperaxConfig.get_default_for_map("standard")  # or "pointmaze", "snake"
+target_maze_map = TargetKheperaxConfig.get_default_for_map("standard")  # or "pointmaze", "snake"
+
+# Create a quad maze configuration
+quad_config = make_quad_config(maze_map)  # or target_maze_map for target-based tasks
+```
+
 
 [//]: # (Images of the different quad mazes)
 
@@ -225,8 +251,8 @@ target_config = TargetKheperaxConfig.get_default()
 ```
 
 This setup includes:
-- A target position (default: (0.15, 0.9))
-- Target radius (default: 0.05)
+- A target position (default: `(0.15, 0.9)`)
+- Target radius (default: `0.05`)
 - Reward based on distance to target
 - Episode termination upon reaching the target
 
@@ -246,13 +272,6 @@ quad_config = make_quad_config(base_config)
 ```
 
 Quad mazes expand the original maze into four quadrants, providing a more complex environment for the robot to navigate. The `make_quad_config` function takes an existing configuration and transforms it into a quad maze configuration.
-
-## Kheperax with a target
-
-In order to use Kheperax with a target position to reach at the end of the maze, you can use the `TargetKheperaxTask` class. 
-The target position is set by default in `(0.15, 0.9)` with a radius of `0.05`. 
-The reward at each step is defined as the negative distance to the target center, and reaching the target position ends the episode.   
-Rendering the environment will then show the target position as a green circle.
 
 ## Contributing
 
