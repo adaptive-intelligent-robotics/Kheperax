@@ -5,23 +5,15 @@ from typing import Callable, Optional, Tuple
 import flax.linen as nn
 import jax
 import jax.numpy as jnp
-
 from qdax.core.neuroevolution.buffers.buffer import QDTransition, Transition
-from qdax.custom_types import (
-    Descriptor,
-    ExtraScores,
-    Fitness,
-    Genotype,
-    Params,
-    RNGKey,
-)
+from qdax.custom_types import Descriptor, ExtraScores, Fitness, Genotype, Params, RNGKey
 
-from kheperax.envs.kheperax_state import KheperaxState
 from kheperax.envs.env import Env
+from kheperax.envs.kheperax_state import KheperaxState
 
 
 def get_final_state_desc(data: QDTransition, mask: jnp.ndarray) -> Descriptor:
-    """Compute final xy positon.
+    """Compute final xy position.
 
     This function suppose that state descriptor is the xy position, as it
     just select the final one of the state descriptors given.
@@ -40,9 +32,7 @@ def get_final_state_desc(data: QDTransition, mask: jnp.ndarray) -> Descriptor:
 def make_policy_network_play_step_fn(
     step_fn: Callable[[KheperaxState, jnp.ndarray], KheperaxState],
     policy_network: nn.Module,
-) -> Callable[
-    [KheperaxState, Params, RNGKey], Tuple[KheperaxState, QDTransition]
-]:
+) -> Callable[[Params, KheperaxState, RNGKey], Tuple[KheperaxState, QDTransition]]:
     """
     Creates a function that when called, plays a step of the environment.
 
@@ -57,8 +47,8 @@ def make_policy_network_play_step_fn(
 
     # Define the function to play a step with the policy in the environment
     def default_play_step_fn(
-        env_state: KheperaxState,
         policy_params: Params,
+        env_state: KheperaxState,
         key: RNGKey,
     ) -> Tuple[KheperaxState, QDTransition]:
         """
@@ -107,13 +97,14 @@ def get_mask_from_transitions(
     mask = mask.at[:, 0].set(0)
     return mask
 
+
 def generate_unroll(
     init_state: KheperaxState,
     policy_params: Params,
     key: RNGKey,
     episode_length: int,
     play_step_fn: Callable[
-        [KheperaxState, Params, RNGKey],
+        [Params, KheperaxState, RNGKey],
         Tuple[
             KheperaxState,
             Transition,
@@ -133,15 +124,16 @@ def generate_unroll(
     Returns:
         A new state, the experienced transition.
     """
-    play_step_params_fn = partial(play_step_fn, policy_params=policy_params)
+    play_step_params_fn = partial(play_step_fn, policy_params)
     key, subkey = jax.random.split(key)
     keys = jax.random.split(subkey, episode_length)
 
     def _scan_play_step_fn(
-        carry: Tuple[KheperaxState,], key: RNGKey,
+        carry: Tuple[KheperaxState,],
+        key: RNGKey,
     ) -> Tuple[Tuple[KheperaxState], Transition]:
         _env_state = carry[0]
-        _env_state, _transitions = play_step_params_fn(env_state=_env_state, key=key)
+        _env_state, _transitions = play_step_params_fn(_env_state, key)
         return (_env_state,), _transitions
 
     (state,), transitions = jax.lax.scan(
@@ -159,7 +151,8 @@ def scoring_function_kheperax_envs(
     episode_length: int,
     reset_fn: Callable[[RNGKey], KheperaxState],
     play_step_fn: Callable[
-        [KheperaxState, Params, RNGKey], Tuple[KheperaxState, Params, RNGKey, QDTransition]
+        [Params, KheperaxState, RNGKey],
+        Tuple[KheperaxState, QDTransition],
     ],
     descriptor_extractor: Callable[[QDTransition, jnp.ndarray], Descriptor],
 ) -> Tuple[Fitness, Descriptor, ExtraScores, RNGKey]:
@@ -222,12 +215,10 @@ def create_kheperax_scoring_fn(
     descriptor_extraction_fn: Callable[[QDTransition, jnp.ndarray], Descriptor],
     episode_length: int,
     play_step_fn: Optional[
-        Callable[
-            [KheperaxState, Params, RNGKey], Tuple[KheperaxState, QDTransition]
-        ]
+        Callable[[Params, KheperaxState, RNGKey], Tuple[KheperaxState, QDTransition]]
     ] = None,
     reset_fn: Optional[Callable[[RNGKey], KheperaxState]] = None,
-) -> Callable[[Genotype, RNGKey], Tuple[Fitness, Descriptor, ExtraScores]]:
+) -> Callable[[Genotype, RNGKey], Tuple[Fitness, Descriptor, ExtraScores, RNGKey]]:
     """
     Creates a scoring function to evaluate a policy in a BRAX task.
 
@@ -264,4 +255,3 @@ def create_kheperax_scoring_fn(
     )
 
     return scoring_fn
-

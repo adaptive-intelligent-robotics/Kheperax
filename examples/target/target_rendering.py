@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 
 from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
 def example_usage_render():
@@ -30,18 +30,18 @@ def example_usage_render():
 
     img = env.render(init_state)
 
-    plt.imshow(img, origin='lower')
+    plt.imshow(img, origin="lower")
     plt.xticks([])
     plt.yticks([])
 
-    folder_save = Path('output')
+    folder_save = Path("output")
     folder_save.mkdir(exist_ok=True, parents=True)
     file_name = folder_save / "maze_target.png"
     plt.savefig(file_name)
     print("Saved file:", file_name)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # matplotlib backend agg for headless mode
     plt.switch_backend("agg")
     example_usage_render()

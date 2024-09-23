@@ -1,28 +1,23 @@
-import jax
-from jax import numpy as jnp
-import flax.linen as nn
 from typing import Callable, Tuple
 
+import flax.linen as nn
+import jax
+from jax import numpy as jnp
 from qdax.core.neuroevolution.buffers.buffer import QDTransition
 from qdax.core.neuroevolution.networks.networks import MLP
-from qdax.custom_types import (
-    Params,
-    RNGKey,
-)
+from qdax.custom_types import Params, RNGKey
 
-from kheperax.envs.kheperax_state import KheperaxState
 from kheperax.envs.env import Env
-from kheperax.envs.wrappers import EpisodeWrapper, TypeFixerWrapper
-from kheperax.tasks.target import TargetKheperaxTask, TargetKheperaxConfig
-from kheperax.envs.scoring import get_final_state_desc, create_kheperax_scoring_fn
+from kheperax.envs.kheperax_state import KheperaxState
+from kheperax.envs.scoring import create_kheperax_scoring_fn, get_final_state_desc
+from kheperax.envs.wrappers import EpisodeWrapper
+from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
 
 def make_final_policy_network_play_step_fn(  # TODO: ?
     env: Env,
     policy_network: nn.Module,
-) -> Callable[
-    [KheperaxState, Params, RNGKey], Tuple[KheperaxState, QDTransition]
-]:
+) -> Callable[[KheperaxState, Params, RNGKey], Tuple[KheperaxState, QDTransition]]:
     """
     Creates a function that when called, plays a step of the environment.
 
@@ -34,6 +29,7 @@ def make_final_policy_network_play_step_fn(  # TODO: ?
     Returns:
         default_play_step_fn: A function that plays a step of the environment.
     """
+
     def final_play_step_fn(
         env_state: KheperaxState,
         policy_params: Params,
@@ -97,17 +93,24 @@ def make_final_policy_network_play_step_fn(  # TODO: ?
 
 class FinalDistKheperaxTask(TargetKheperaxTask):
     """Kheperax task that only rewards the final distance to the target"""
+
     @classmethod
-    def create_default_task(cls,
-                            kheperax_config: TargetKheperaxConfig,
-                            random_key,
-                            ):
+    def create_default_task(
+        cls,
+        kheperax_config: TargetKheperaxConfig,
+        random_key,
+    ):
         env = cls(kheperax_config)
-        env = EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=1)
-        env = TypeFixerWrapper(env)
+        env_wrapper = EpisodeWrapper(
+            env,
+            kheperax_config.episode_length,
+            action_repeat=kheperax_config.action_repeat,
+        )
 
         # Init policy network
-        policy_layer_sizes = kheperax_config.mlp_policy_hidden_layer_sizes + (env.action_size,)
+        policy_layer_sizes = kheperax_config.mlp_policy_hidden_layer_sizes + (
+            env_wrapper.action_size,
+        )
         policy_network = MLP(
             layer_sizes=policy_layer_sizes,
             kernel_init=jax.nn.initializers.lecun_uniform(),
@@ -117,39 +120,46 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
         bd_extraction_fn = get_final_state_desc
 
         play_step_fn = make_final_policy_network_play_step_fn(
-            env,
+            env_wrapper,
             policy_network,
         )
 
         scoring_fn = create_kheperax_scoring_fn(
-            env,
+            env_wrapper,
             policy_network,
             bd_extraction_fn,
             play_step_fn=play_step_fn,
             episode_length=kheperax_config.episode_length,
         )
 
-        return env, policy_network, scoring_fn
+        return env_wrapper, policy_network, scoring_fn
 
     def step(self, state: KheperaxState, action: jnp.ndarray) -> KheperaxState:
         random_key = state.random_key
 
         # actions should be between -1 and 1
-        action = jnp.clip(action, -1., 1.)
+        action = jnp.clip(action, -1.0, 1.0)
 
         random_key, subkey = jax.random.split(random_key)
         wheel_velocities = self._get_wheel_velocities(action, subkey)
 
-        new_robot, bumper_measures = state.robot.move(wheel_velocities[0], wheel_velocities[1], state.maze)
+        new_robot, bumper_measures = state.robot.move(
+            wheel_velocities[0], wheel_velocities[1], state.maze
+        )
 
         random_key, subkey = jax.random.split(random_key)
-        obs = self._get_obs(new_robot, state.maze, bumper_measures=bumper_measures, random_key=subkey)
+        obs = self._get_obs(
+            new_robot, state.maze, bumper_measures=bumper_measures, random_key=subkey
+        )
 
         # Standard: reward penalizes high action values
         # reward = -1. * jnp.power(jnp.linalg.norm(wheel_velocities), 2.)
 
         # Reward is the distance to the target * 100
-        target_dist = jnp.linalg.norm(jnp.array(self.kheperax_config.target_pos) - jnp.array(self.get_xy_pos(new_robot)))
+        target_dist = jnp.linalg.norm(
+            jnp.array(self.kheperax_config.target_pos)
+            - jnp.array(self.get_xy_pos(new_robot))
+        )
         reward = -100 * target_dist
         # reward = -1.
 
@@ -162,7 +172,7 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
         # Reward 0 if target is reached
         reward = jnp.where(
             done,
-            0.,
+            0.0,
             reward,
         )
 

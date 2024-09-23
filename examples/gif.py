@@ -12,10 +12,10 @@ from tqdm import tqdm
 from kheperax.tasks.quad import make_quad_config
 from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
-def example_usage_gif(map_name='standard'):
+def example_usage_gif(map_name="standard"):
     print(f"Rendering GIF {map_name}")
 
     random_key = jax.random.PRNGKey(1)
@@ -25,7 +25,9 @@ def example_usage_gif(map_name='standard'):
     # Define Task configuration
     if "quad_" in map_name:
         base_map_name = map_name.replace("quad_", "")
-        config_kheperax = make_quad_config(TargetKheperaxConfig.get_default_for_map(base_map_name))
+        config_kheperax = make_quad_config(
+            TargetKheperaxConfig.get_default_for_map(base_map_name)
+        )
     else:
         config_kheperax = TargetKheperaxConfig.get_default_for_map(map_name)
 
@@ -35,10 +37,7 @@ def example_usage_gif(map_name='standard'):
     )
 
     random_key, subkey = jax.random.split(subkey)
-    state = env.reset(subkey)
-
     jit_env_step = jax.jit(env.step)
-    jit_inference_fn = jax.jit(policy_network.apply)
     state = env.reset(subkey)
 
     rollout = []
@@ -53,7 +52,9 @@ def example_usage_gif(map_name='standard'):
         image = env.render_rgb_image(image, flip=True)
         rollout.append(image)
         # Random action
-        action = jax.random.uniform(random_key, shape=(env.action_size,), minval=-1.0, maxval=1.0)
+        action = jax.random.uniform(
+            random_key, shape=(env.action_size,), minval=-1.0, maxval=1.0
+        )
         state = jit_env_step(state, action)
 
     # Make GIF
@@ -71,7 +72,7 @@ def example_usage_gif(map_name='standard'):
 
 
 def run_example():
-    map_name = 'standard'
+    map_name = "standard"
     # map_name='pointmaze'
     # map_name='snake'
 
@@ -84,5 +85,5 @@ def run_example():
     example_usage_gif(map_name)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_example()

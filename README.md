@@ -39,14 +39,14 @@ The agent corresponds to a Khepera-like robot (circular robots with 2 wheels) th
 This robot has (by default):
 - 3 lasers to estimate its distance to some walls in specific directions (by default -45, 0 and 45 degrees).
 - 2 bumpers to detect contact with walls.
-At each time-step, the agent receives an observation, which corresponds to all laser and bumper measures: 
+At each time-step, the agent receives an observation, which corresponds to all laser and bumper measures:
 ```
 # by default:
 [laser 1, laser 2, laser 3, bumper left, bumper right]
 ```
 The bumpers return `1` if there's a contact with a wall and `-1` otherwise.
 
-The actions to pass to the environment should be between `-1` and `1`. 
+The actions to pass to the environment should be between `-1` and `1`.
 They are then scaled depending on a scale defined in the environment configuration.
 
 ### Quality-Diversity Properties
@@ -159,13 +159,13 @@ Kheperax supports various tasks and maze types. Here's an overview of the availa
   - **Target Radius**: Specifies the size of the target area.
      - Default radius: 0.05
      - The episode ends when the robot enters this radius.
-- **Reward Function**: 
+- **Reward Function**:
    - At each step, the reward is the negative distance to the target center.
    - This encourages the robot to move towards the target.
 -  **Episode Termination**:
    - The episode ends when the robot reaches the target (enters the target radius).
    - Also terminates if the maximum number of steps is reached.
--  **Rendering**: 
+-  **Rendering**:
    - When rendered, the target appears as a green circle in the maze.
 
 #### Usage Example:

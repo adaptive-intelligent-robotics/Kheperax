@@ -2,6 +2,7 @@
 Example directly inspired from:
 https://github.com/adaptive-intelligent-robotics/QDax/blob/b44969f94aaa70dc6e53aaed95193f65f20400c2/examples/scripts/me_example.py
 """
+
 import functools
 import warnings  # Remove FutureWarning
 from pathlib import Path
@@ -20,10 +21,10 @@ from tqdm import tqdm
 
 from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
-def run_me(map_name='standard') -> None:
+def run_me(map_name="standard") -> None:
     print(f"Running MAP-Elites on {map_name} with target")
     seed = 42
     batch_size = 128
@@ -45,8 +46,11 @@ def run_me(map_name='standard') -> None:
 
     episode_length = config_kheperax.episode_length
 
-    # Example of modification of the robots attributes (same thing could be done with the maze)
-    config_kheperax.robot = config_kheperax.robot.replace(lasers_return_minus_one_if_out_of_range=True)
+    # Example of modification of the robots attributes
+    # (same thing could be done with the maze)
+    config_kheperax.robot = config_kheperax.robot.replace(
+        lasers_return_minus_one_if_out_of_range=True
+    )
 
     # Create Kheperax Task.
     (
@@ -111,17 +115,23 @@ def run_me(map_name='standard') -> None:
 
     all_metrics = []
     for iteration in range(num_iterations):
-        (repertoire, emitter_state, metrics, random_key,) = update_fn(
+        (
+            repertoire,
+            emitter_state,
+            metrics,
+            random_key,
+        ) = update_fn(
             repertoire,
             emitter_state,
             random_key,
         )
         all_metrics.append(metrics)
-        print(f"{iteration}/{num_iterations} - { {k: v.item() for (k, v) in metrics.items()} }")
+        print(
+            f"{iteration}/{num_iterations}"
+            f" - {({k: v.item() for (k, v) in metrics.items()})}"
+        )
 
-    metrics = {
-        k: jnp.stack([m[k] for m in all_metrics]) for k in all_metrics[0].keys()
-    }
+    metrics = {k: jnp.stack([m[k] for m in all_metrics]) for k in all_metrics[0].keys()}
 
     # plot archive
     fig, axes = plot_2d_map_elites_repertoire(
@@ -153,10 +163,7 @@ def run_me(map_name='standard') -> None:
 
     # Record gif
     elite_index = jnp.argmax(repertoire.fitnesses)
-    elite = jax.tree_util.tree_map(
-        lambda x: x[elite_index],
-        repertoire.genotypes
-    )
+    elite = jax.tree_util.tree_map(lambda x: x[elite_index], repertoire.genotypes)
 
     jit_env_step = jax.jit(env.step)
     jit_inference_fn = jax.jit(policy_network.apply)
@@ -186,7 +193,7 @@ def run_me(map_name='standard') -> None:
 
 
 def run_example():
-    map_name='standard'
+    map_name = "standard"
     # map_name = 'pointmaze'
 
     # matplotlib backend agg for headless mode

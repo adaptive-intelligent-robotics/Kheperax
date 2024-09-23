@@ -10,10 +10,10 @@ from kheperax.envs.maze_maps import TARGET_KHEPERAX_MAZES
 from kheperax.tasks.quad import make_quad_config
 from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
-def example_usage_render(map_name='standard'):
+def example_usage_render(map_name="standard"):
     random_key = jax.random.PRNGKey(1)
 
     random_key, subkey = jax.random.split(random_key)
@@ -31,16 +31,16 @@ def example_usage_render(map_name='standard'):
 
     img = env.render(init_state)
 
-    plt.imshow(img, origin='lower')
+    plt.imshow(img, origin="lower")
     plt.xticks([])
     plt.yticks([])
 
-    file_name = f'maps/{map_name}.png'
+    file_name = f"maps/{map_name}.png"
     plt.savefig(file_name)
     print("Saved file:", file_name)
 
 
-def quad_maps_render(map_name='standard'):
+def quad_maps_render(map_name="standard"):
     print(f"Rendering Quad {map_name}")
     random_key = jax.random.PRNGKey(1)
 
@@ -59,11 +59,11 @@ def quad_maps_render(map_name='standard'):
 
     img = env.render(init_state)
 
-    plt.imshow(img, origin='lower')
+    plt.imshow(img, origin="lower")
     plt.xticks([])
     plt.yticks([])
 
-    file_name = f'maps/quad_{map_name}.png'
+    file_name = f"maps/quad_{map_name}.png"
     plt.savefig(file_name)
     print("Saved file:", file_name)
 
@@ -77,5 +77,5 @@ def run_example():
         example_usage_render(map_name)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_example()

@@ -1,6 +1,6 @@
+flax==0.8.5
+imageio==2.35.1
 jax==0.4.30
 jaxlib==0.4.30
-flax==0.8.5
 qdax==0.4.0
 tqdm==4.66.5
-imageio==2.35.1

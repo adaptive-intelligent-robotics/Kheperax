@@ -3,14 +3,12 @@ Example directly inspired from:
 https://github.com/adaptive-intelligent-robotics/QDax/blob/b44969f94aaa70dc6e53aaed95193f65f20400c2/examples/scripts/me_example.py
 """
 
-
 import functools
 from pathlib import Path
 
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
-
 from qdax.core.containers.mapelites_repertoire import compute_euclidean_centroids
 from qdax.core.emitters.mutation_operators import isoline_variation
 from qdax.core.emitters.standard_emitters import MixingEmitter
@@ -18,7 +16,7 @@ from qdax.core.map_elites import MAPElites
 from qdax.utils.metrics import default_qd_metrics
 from qdax.utils.plotting import plot_2d_map_elites_repertoire
 
-from kheperax.tasks.main import KheperaxTask, KheperaxConfig
+from kheperax.tasks.main import KheperaxConfig, KheperaxTask
 
 
 def run_me() -> None:
@@ -42,8 +40,11 @@ def run_me() -> None:
     config_kheperax.episode_length = episode_length
     config_kheperax.mlp_policy_hidden_layer_sizes = mlp_policy_hidden_layer_sizes
 
-    # Example of modification of the robots attributes (same thing could be done with the maze)
-    config_kheperax.robot = config_kheperax.robot.replace(lasers_return_minus_one_if_out_of_range=True)
+    # Example of modification of the robots attributes
+    # (same thing could be done with the maze)
+    config_kheperax.robot = config_kheperax.robot.replace(
+        lasers_return_minus_one_if_out_of_range=True
+    )
 
     # Create Kheperax Task.
     (
@@ -107,12 +108,20 @@ def run_me() -> None:
 
     # Run MAP-Elites loop
     for iteration in range(num_iterations):
-        (repertoire, emitter_state, metrics, random_key,) = update_fn(
+        (
+            repertoire,
+            emitter_state,
+            metrics,
+            random_key,
+        ) = update_fn(
             repertoire,
             emitter_state,
             random_key,
         )
-        print(f"{iteration}/{num_iterations} - { {k:v.item() for (k,v) in metrics.items()} }")
+        print(
+            f"{iteration}/{num_iterations}"
+            f" - {({k: v.item() for (k, v) in metrics.items()})}"
+        )
 
     # plot archive
     fig, axes = plot_2d_map_elites_repertoire(
@@ -128,7 +137,7 @@ def run_me() -> None:
     save_folder.mkdir(exist_ok=True, parents=True)
     plt.savefig(save_folder / "repertoire.png")
     plt.show()
-        
+
 
 if __name__ == "__main__":
     # matplotlib backend agg for headless mode

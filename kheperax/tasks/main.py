@@ -1,20 +1,22 @@
 from __future__ import annotations
 
-from typing import List, Tuple
-
 import dataclasses
+from functools import partial
+from typing import Generic, Tuple
+
 import jax.tree_util
 from jax import numpy as jnp
 from qdax.core.neuroevolution.networks.networks import MLP
+from typing_extensions import TypeVar
 
+from kheperax.envs.env import Env
+from kheperax.envs.kheperax_state import KheperaxState
+from kheperax.envs.maze_maps import get_target_maze_map
+from kheperax.envs.scoring import create_kheperax_scoring_fn, get_final_state_desc
+from kheperax.envs.wrappers import EpisodeWrapper
 from kheperax.simu.maze import Maze
 from kheperax.simu.robot import Robot
-from kheperax.envs.maze_maps import get_target_maze_map
-from kheperax.envs.kheperax_state import KheperaxState
 from kheperax.utils.rendering_tools import RenderingTools
-from kheperax.envs.env import Env
-from kheperax.envs.wrappers import EpisodeWrapper, TypeFixerWrapper
-from kheperax.envs.scoring import create_kheperax_scoring_fn, get_final_state_desc
 
 DEFAULT_RESOLUTION = (1024, 1024)
 
@@ -43,34 +45,43 @@ class KheperaxConfig:
             mlp_policy_hidden_layer_sizes=(8,),
             resolution=DEFAULT_RESOLUTION,
             action_scale=0.025,
-            maze=Maze.create(
-                segments_list=maze_map.segments
-            ),
+            maze=Maze.create(segments_list=maze_map.segments),
             robot=Robot.create_default_robot(),
             std_noise_wheel_velocities=0.0,
-            limits=((0., 0.), (1., 1.)),
+            limits=((0.0, 0.0), (1.0, 1.0)),
             action_repeat=1,
         )
 
     def to_dict(self):
-        return {field.name: getattr(self, field.name) for field in dataclasses.fields(self)}
+        return {
+            field.name: getattr(self, field.name) for field in dataclasses.fields(self)
+        }
 
 
-class KheperaxTask(Env):
-    def __init__(self, kheperax_config: KheperaxConfig, **_):
+ConfigT = TypeVar("ConfigT", bound=KheperaxConfig)
+
+
+class KheperaxTask(Env, Generic[ConfigT]):
+    def __init__(self, kheperax_config: ConfigT, **_):
         self.kheperax_config = kheperax_config
 
     @classmethod
-    def create_default_task(cls,
-                            kheperax_config: KheperaxConfig,
-                            random_key,
-                            ):
+    def create_default_task(
+        cls,
+        kheperax_config: ConfigT,
+        random_key,
+    ):
         env = cls(kheperax_config)
-        env = EpisodeWrapper(env, kheperax_config.episode_length, action_repeat=kheperax_config.action_repeat)
-        env = TypeFixerWrapper(env)
+        ep_wrapper_env = EpisodeWrapper(
+            env,
+            kheperax_config.episode_length,
+            action_repeat=kheperax_config.action_repeat,
+        )
 
         # Init policy network
-        policy_layer_sizes = kheperax_config.mlp_policy_hidden_layer_sizes + (env.action_size,)
+        policy_layer_sizes = kheperax_config.mlp_policy_hidden_layer_sizes + (
+            ep_wrapper_env.action_size,
+        )
         policy_network = MLP(
             layer_sizes=policy_layer_sizes,
             kernel_init=jax.nn.initializers.lecun_uniform(),
@@ -80,13 +91,13 @@ class KheperaxTask(Env):
         bd_extraction_fn = get_final_state_desc
 
         scoring_fn = create_kheperax_scoring_fn(
-            env,
+            ep_wrapper_env,
             policy_network,
             bd_extraction_fn,
             episode_length=kheperax_config.episode_length,
         )
 
-        return env, policy_network, scoring_fn
+        return ep_wrapper_env, policy_network, scoring_fn
 
     def get_xy_pos(self, robot: Robot):
         return jnp.asarray([robot.posture.x, robot.posture.y])
@@ -96,7 +107,7 @@ class KheperaxTask(Env):
 
         random_key, subkey = jax.random.split(random_key)
         obs = self._get_obs(robot, self.kheperax_config.maze, random_key=subkey)
-        reward = 0.
+        reward = 0.0
         done = False
 
         info = {
@@ -117,8 +128,10 @@ class KheperaxTask(Env):
 
     def _get_wheel_velocities(self, action, random_key):
         random_key, subkey = jax.random.split(random_key)
-        noise_wheel_velocities = jax.random.normal(subkey, shape=action.shape) \
-                                 * self.kheperax_config.std_noise_wheel_velocities
+        noise_wheel_velocities = (
+            jax.random.normal(subkey, shape=action.shape)
+            * self.kheperax_config.std_noise_wheel_velocities
+        )
 
         scale_actions = self.kheperax_config.action_scale
         wheel_velocities = action * scale_actions
@@ -131,18 +144,22 @@ class KheperaxTask(Env):
         random_key = state.random_key
 
         # actions should be between -1 and 1
-        action = jnp.clip(action, -1., 1.)
+        action = jnp.clip(action, -1.0, 1.0)
 
         random_key, subkey = jax.random.split(random_key)
         wheel_velocities = self._get_wheel_velocities(action, subkey)
 
-        new_robot, bumper_measures = state.robot.move(wheel_velocities[0], wheel_velocities[1], state.maze)
+        new_robot, bumper_measures = state.robot.move(
+            wheel_velocities[0], wheel_velocities[1], state.maze
+        )
 
         random_key, subkey = jax.random.split(random_key)
-        obs = self._get_obs(new_robot, state.maze, bumper_measures=bumper_measures, random_key=subkey)
+        obs = self._get_obs(
+            new_robot, state.maze, bumper_measures=bumper_measures, random_key=subkey
+        )
 
         # reward penalizes high action values
-        reward = -1. * jnp.power(jnp.linalg.norm(wheel_velocities), 2.)
+        reward = -1.0 * jnp.power(jnp.linalg.norm(wheel_velocities), 2.0)
 
         # only stop at the end of the episode
         done = False
@@ -161,7 +178,9 @@ class KheperaxTask(Env):
             random_key=new_random_key,
         )
 
-    def _get_obs(self, robot: Robot, maze: Maze, random_key, bumper_measures: jnp.ndarray = None) -> jnp.ndarray:
+    def _get_obs(
+        self, robot: Robot, maze: Maze, random_key, bumper_measures: jnp.ndarray = None
+    ) -> jnp.ndarray:
         random_key, subkey = jax.random.split(random_key)
         laser_measures = robot.laser_measures(maze, random_key=subkey)
 
@@ -189,62 +208,91 @@ class KheperaxTask(Env):
         return 2
 
     @property
-    def behavior_descriptor_limits(self) -> Tuple[List[float], List[float]]:
+    def behavior_descriptor_limits(
+        self,
+    ) -> Tuple[Tuple[float, float], Tuple[float, float]]:
         return self.kheperax_config.limits
 
     @property
     def backend(self) -> str:
         return "Kheperax"
 
-    def render(self, state: KheperaxState, ) -> jnp.ndarray:
+    def render(
+        self,
+        state: KheperaxState,
+    ) -> jnp.ndarray:
         # WARNING: only consider the maze is in the unit square
-        coeff_triangle = 3.
+        coeff_triangle = 3.0
         image = jnp.zeros(self.kheperax_config.resolution, dtype=jnp.float32)
-        image = RenderingTools.place_triangle(self.kheperax_config, image,
-                                              point_1=(
-                                                  state.robot.posture.x + coeff_triangle * state.robot.radius * jnp.cos(
-                                                      state.robot.posture.angle),
-                                                  state.robot.posture.y + coeff_triangle * state.robot.radius * jnp.sin(
-                                                      state.robot.posture.angle)),
-                                              point_2=(state.robot.posture.x + state.robot.radius * jnp.cos(
-                                                  state.robot.posture.angle - jnp.pi / 2),
-                                                       state.robot.posture.y + state.robot.radius * jnp.sin(
-                                                           state.robot.posture.angle - jnp.pi / 2)),
-                                              point_3=(state.robot.posture.x + state.robot.radius * jnp.cos(
-                                                  state.robot.posture.angle + jnp.pi / 2),
-                                                       state.robot.posture.y + state.robot.radius * jnp.sin(
-                                                           state.robot.posture.angle + jnp.pi / 2)),
-                                              value=2.)
+        image = RenderingTools.place_triangle(
+            self.kheperax_config,
+            image,
+            point_1=(
+                state.robot.posture.x
+                + coeff_triangle
+                * state.robot.radius
+                * jnp.cos(state.robot.posture.angle),
+                state.robot.posture.y
+                + coeff_triangle
+                * state.robot.radius
+                * jnp.sin(state.robot.posture.angle),
+            ),
+            point_2=(
+                state.robot.posture.x
+                + state.robot.radius * jnp.cos(state.robot.posture.angle - jnp.pi / 2),
+                state.robot.posture.y
+                + state.robot.radius * jnp.sin(state.robot.posture.angle - jnp.pi / 2),
+            ),
+            point_3=(
+                state.robot.posture.x
+                + state.robot.radius * jnp.cos(state.robot.posture.angle + jnp.pi / 2),
+                state.robot.posture.y
+                + state.robot.radius * jnp.sin(state.robot.posture.angle + jnp.pi / 2),
+            ),
+            value=2.0,
+        )
 
-        image = RenderingTools.place_circle(self.kheperax_config, image,
-                                            center=(state.robot.posture.x, state.robot.posture.y),
-                                            radius=state.robot.radius,
-                                            value=1.)
+        image = RenderingTools.place_circle(
+            self.kheperax_config,
+            image,
+            center=(state.robot.posture.x, state.robot.posture.y),
+            radius=state.robot.radius,
+            value=1.0,
+        )
 
-        white = jnp.array([1., 1., 1.])
-        blue = jnp.array([0., 0., 1.])
-        red = jnp.array([1., 0., 0.])
-        green = jnp.array([0., 1., 0.])
-        magenta = jnp.array([0.5, 0., 1.])
-        cyan = jnp.array([0., 1., 1.])
-        yellow = jnp.array([1., 1., 0.])
-        black = jnp.array([0., 0., 0.])
+        white = jnp.array([1.0, 1.0, 1.0])
+        blue = jnp.array([0.0, 0.0, 1.0])
+        # red = jnp.array([1.0, 0.0, 0.0])
+        # green = jnp.array([0.0, 1.0, 0.0])
+        magenta = jnp.array([0.5, 0.0, 1.0])
+        # cyan = jnp.array([0.0, 1.0, 1.0])
+        # yellow = jnp.array([1.0, 1.0, 0.0])
+        black = jnp.array([0.0, 0.0, 0.0])
 
-        image = RenderingTools.place_segments(self.kheperax_config, image,
-                                              state.maze.walls,
-                                              value=5.)
+        image = RenderingTools.place_segments(
+            self.kheperax_config, image, state.maze.walls, value=5.0
+        )
 
         index_to_color = {
-            0.: white,
-            1.: blue,
-            2.: magenta,
-            5.: black,
+            0.0: white,
+            1.0: blue,
+            2.0: magenta,
+            5.0: black,
         }
 
         def _map_colors(x):
             new_array = jnp.zeros((3,))
-            for key, value in index_to_color.items():
-                new_array = jax.lax.cond(jnp.isclose(x, key), lambda _: value, lambda _: new_array, operand=None)
+
+            def identity_fn(_, x):
+                return x
+
+            for index_color, value_color in index_to_color.items():
+                new_array = jax.lax.cond(
+                    jnp.isclose(x, index_color),
+                    partial(identity_fn, value_color),
+                    partial(identity_fn, new_array),
+                    operand=None,
+                )
             return new_array
 
         image = jax.vmap(jax.vmap(_map_colors))(image)

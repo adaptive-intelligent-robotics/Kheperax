@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 import flax.struct
 from jax import numpy as jnp
@@ -14,6 +14,7 @@ class KheperaxState(flax.struct.PyTreeNode):
     """
     Environment state for training and inference.
     """
+
     robot: Robot
     maze: Maze
     obs: jnp.ndarray
