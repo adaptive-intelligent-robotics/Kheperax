@@ -8,8 +8,11 @@ Kheperax is fully written using [JAX](https://github.com/google/jax), to leverag
 - Fully implemented in JAX for hardware acceleration
 - Simulates Khepera-like robots (circular robots with 2 wheels) in 2D mazes
 - Configurable robot sensors (lasers and bumpers)
-- Supports Quality-Diversity optimization scenarios
+- Directly compatible with the [QDax library](https://github.com/adaptive-intelligent-robotics/QDax) for efficient Quality-Diversity optimization
 - Customizable maze layouts and target-based tasks
+- Rendering capabilities for visualizing the environment
+
+[//]: # (Add images or animations of the environment)
 
 ## Installation
 
@@ -29,8 +32,8 @@ pip install kheperax[cuda12]
 
 ### Environment
 
-Each episode is run for a fixed amount of timesteps (by default equal to `250`).
-The agent corresponds to a Khepera-like robot that moves in a planar 2-dimensional maze.
+Each episode is run for a fixed amount of time-steps (by default equal to `250`).
+The agent corresponds to a Khepera-like robot (circular robots with 2 wheels) that moves in a planar 2-dimensional maze.
 This robot has (by default):
 - 3 lasers to estimate its distance to some walls in specific directions (by default -45, 0 and 45 degrees).
 - 2 bumpers to detect contact with walls.
@@ -50,6 +53,22 @@ They are then scaled depending on a scale defined in the environment configurati
 - Descriptor: final 2-dimensional location of the robot.
 
 ## Run examples
+
+### Install Dependencies
+
+Before running examples, we recommend creating a virtual environment and installing the required dependencies:
+
+```shell
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+If you want to run the examples with CUDA 12 support, you need install `jax` with the `cuda12` extra:
+
+```shell
+pip install jax[cuda12]==<version-from-requirements.txt>
+```
 
 ### Launch MAP-Elites Example
 
@@ -71,31 +90,51 @@ python -m examples.gif
 
 ## Task Configuration
 
-The `KheperaxTask` takes as input a `KheperaxConfig` object, organised as follows:
+The `KheperaxTask` is configured using a `KheperaxConfig` object:
 
-`KheperaxConfig`
-- `Robot`:
-  - `posture`: initial `Posture` (containing position and orientation)
-  - `radius`: robot radius
-  - `laser_ranges`: laser max ranges.
-  - `laser_angles`: angles of placement of the lasers on the robot
-  - `std_noise_sensor_measures`: standard deviation of the gaussian noise applied to the sensor measures.
-  - `lasers_return_minus_one_if_out_of_range`: 
-  If `True`, then the lasers return `-1` if their measure is out of range (like in the original implementation).
-  If `False`, then returns the max laser range.
-- `Maze`:
-  - `walls`: tree of `Segments` representing the placement of the walls in the environment.
-- `action_scale`: all the commanded wheel velocities will be between -1 * `action_scale` and `action_scale`
-- `std_noise_wheel_velocities`: standard deviation of the gaussian noise applied to the wheel velocities.
-- `resolution`: resolution of the maze when calling `env.render(...)` 
-- `action_repeat`: number of times the action is repeated before the next observation is computed.
-
-To get an initial configuration, you can run:
 ```python
-config_kheperax = KheperaxConfig.get_default()
+from kheperax.tasks.main import KheperaxConfig
+
+config = KheperaxConfig.get_default()
 ```
 
-You can then modify the properties of the config by directly changing its attributes.
+Key configuration options with their default values:
+
+- `episode_length`: `int = 250`, maximum number of timesteps per episode
+- `mlp_policy_hidden_layer_sizes`: `Tuple[int, ...] = (8,)`, structure of policy network's hidden layers
+- `action_scale`: `float = 0.025`, scales the actions for wheel velocities
+- `robot`: `Robot`, includes:
+  - `posture`: `Posture(x=0.15, y=0.15, angle=pi/2)`, initial position and orientation
+  - `radius`: `float = 0.015`, robot size
+  - `laser_ranges`: `Union[float, List[float]] = 0.2`, max ranges for laser sensors
+  - `laser_angles`: `List[float] = [-pi/4, 0.0, pi/4]`, placement angles for laser sensors
+  - `std_noise_sensor_measures`: `float = 0.0`, noise in sensor readings
+- `maze`: `Maze`, defines the environment layout (default is a standard maze)
+- `std_noise_wheel_velocities`: `float = 0.0`, noise in wheel velocities
+- `resolution`: `Tuple[int, int] = (1024, 1024)`, rendering resolution
+- `limits`: `Tuple[Tuple[float, float], Tuple[float, float]] = ((0., 0.), (1., 1.))`, environment boundaries
+- `action_repeat`: `int = 1`, number of times each action is repeated
+
+Example of customizing the configuration:
+
+```python
+from kheperax.tasks.main import KheperaxConfig
+from kheperax.simu.robot import Robot
+from kheperax.simu.maze import Maze
+
+config = KheperaxConfig.get_default()
+
+config.episode_length = 1000
+config.action_scale = 0.03
+config.resolution = (800, 800)
+
+new_robot = Robot.create_default_robot().replace(radius=0.05)
+config.robot = new_robot
+
+new_maze = Maze.create(segments_list=[...])  # Define maze segments
+config.maze = new_maze
+```
+
 
 ## Tasks and Maze Types
 
@@ -149,11 +188,6 @@ target_task = TargetKheperaxTask(target_config)
 - **Class**: `FinalDistKheperaxTask`
 - **Description**: A task that only rewards the final distance to the target.
 
-### Quad Mazes
-- **File**: `kheperax/tasks/quad.py`
-- **Function**: `make_quad_config`
-- **Description**: Creates quad mazes, which are essentially four copies of the original maze flipped in different orientations.
-
 ### Maze Maps
 - **File**: `kheperax/envs/maze_maps.py`
 - **Description**: Defines various maze layouts, including:
@@ -162,11 +196,21 @@ target_task = TargetKheperaxTask(target_config)
   - Snake maze - `snake`
 
 To use a specific maze map:
+
 ```python
 from kheperax.envs.maze_maps import get_target_maze_map
 
 maze_map = get_target_maze_map("standard")  # or "pointmaze", "snake"
 ```
+
+[//]: # (Images of the different maze maps)
+
+### Quad Mazes
+- **File**: `kheperax/tasks/quad.py`
+- **Function**: `make_quad_config`
+- **Description**: Creates quad mazes, which are essentially four copies of the original maze flipped in different orientations.
+
+[//]: # (Images of the different quad mazes)
 
 ## Advanced Usage
 
@@ -235,8 +279,3 @@ If you use Kheperax in your research, please cite the following paper:
 ## Acknowledgements
 
 - [Original `fastsim` simulator](https://github.com/sferes2/libfastsim) by Mouret and Doncieux (2012)
-
----
-
-![Maze with a target](results/target_maze.png)
-![Kheperax GIF](results/kheperax.gif)
