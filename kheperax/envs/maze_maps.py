@@ -1,4 +1,5 @@
 import dataclasses
+from typing import List, Tuple
 
 from kheperax.simu.geoms import Pos, Segment
 
@@ -13,11 +14,16 @@ class TargetMazeMap:
 TARGET_KHEPERAX_MAZES = {}
 
 
-def register_target_maze(name, segments, target_pos, target_radius):
+def register_target_maze(
+    name: str,
+    segments: List[Segment],
+    target_pos: Tuple[float, float],
+    target_radius: float,
+) -> None:
     TARGET_KHEPERAX_MAZES[name] = TargetMazeMap(segments, target_pos, target_radius)
 
 
-def get_target_maze_map(name) -> TargetMazeMap:
+def get_target_maze_map(name: str) -> TargetMazeMap:
     return TARGET_KHEPERAX_MAZES[name]
 
 

@@ -13,7 +13,7 @@ from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
-def example_usage_render(map_name="standard"):
+def example_usage_render(map_name: str = "standard") -> None:
     random_key = jax.random.PRNGKey(1)
 
     random_key, subkey = jax.random.split(random_key)
@@ -40,7 +40,7 @@ def example_usage_render(map_name="standard"):
     print("Saved file:", file_name)
 
 
-def quad_maps_render(map_name="standard"):
+def quad_maps_render(map_name: str = "standard") -> None:
     print(f"Rendering Quad {map_name}")
     random_key = jax.random.PRNGKey(1)
 
@@ -68,7 +68,7 @@ def quad_maps_render(map_name="standard"):
     print("Saved file:", file_name)
 
 
-def run_example():
+def run_example() -> None:
     # matplotlib backend agg for headless mode
     plt.switch_backend("agg")
     for map_name in TARGET_KHEPERAX_MAZES:

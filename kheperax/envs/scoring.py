@@ -12,7 +12,7 @@ from kheperax.envs.env import Env
 from kheperax.envs.kheperax_state import KheperaxState
 
 
-def get_final_state_desc(data: QDTransition, mask: jnp.ndarray) -> Descriptor:
+def get_final_state_desc(data: QDTransition, mask: jax.typing.ArrayLike) -> Descriptor:
     """Compute final xy position.
 
     This function suppose that state descriptor is the xy position, as it
@@ -30,7 +30,7 @@ def get_final_state_desc(data: QDTransition, mask: jnp.ndarray) -> Descriptor:
 
 
 def make_policy_network_play_step_fn(
-    step_fn: Callable[[KheperaxState, jnp.ndarray], KheperaxState],
+    step_fn: Callable[[KheperaxState, jax.typing.ArrayLike], KheperaxState],
     policy_network: nn.Module,
 ) -> Callable[[Params, KheperaxState, RNGKey], Tuple[KheperaxState, QDTransition]]:
     """
@@ -91,7 +91,7 @@ def make_policy_network_play_step_fn(
 
 def get_mask_from_transitions(
     data: Transition,
-) -> jnp.ndarray:
+) -> jax.Array:
     is_done = jnp.clip(jnp.cumsum(data.dones, axis=1), 0, 1)
     mask = jnp.roll(is_done, 1, axis=1)
     mask = mask.at[:, 0].set(0)
@@ -154,7 +154,7 @@ def scoring_function_kheperax_envs(
         [Params, KheperaxState, RNGKey],
         Tuple[KheperaxState, QDTransition],
     ],
-    descriptor_extractor: Callable[[QDTransition, jnp.ndarray], Descriptor],
+    descriptor_extractor: Callable[[QDTransition, jax.typing.ArrayLike], Descriptor],
 ) -> Tuple[Fitness, Descriptor, ExtraScores, RNGKey]:
     """Evaluates policies contained in policies_params in parallel.
     The play_reset_fn function allows for a more general scoring_function that can be
@@ -212,7 +212,13 @@ def scoring_function_kheperax_envs(
 def create_kheperax_scoring_fn(
     env: Env,
     policy_network: nn.Module,
-    descriptor_extraction_fn: Callable[[QDTransition, jnp.ndarray], Descriptor],
+    descriptor_extraction_fn: Callable[
+        [
+            QDTransition,
+            jax.typing.ArrayLike,
+        ],
+        Descriptor,
+    ],
     episode_length: int,
     play_step_fn: Optional[
         Callable[[Params, KheperaxState, RNGKey], Tuple[KheperaxState, QDTransition]]

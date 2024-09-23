@@ -1,10 +1,16 @@
+from typing import Tuple
+
 import jax
 import jax.numpy as jnp
 
+from kheperax.custom_types import KheperaxImage
 from kheperax.simu.geoms import Pos, Segment
+from kheperax.tasks.config import KheperaxConfig
 
 
-def make_meshgrid(cfg, image):
+def make_meshgrid(
+    cfg: KheperaxConfig, image: KheperaxImage
+) -> Tuple[jax.Array, jax.Array]:
     (min_x, min_y), (max_x, max_y) = cfg.limits
     x, y = jnp.meshgrid(
         jnp.linspace(min_x, max_x, image.shape[0]),
@@ -15,7 +21,14 @@ def make_meshgrid(cfg, image):
 
 class RenderingTools:
     @classmethod
-    def place_circle(cls, cfg, image, center, radius, value):
+    def place_circle(
+        cls,
+        cfg: KheperaxConfig,
+        image: KheperaxImage,
+        center: jax.typing.ArrayLike,
+        radius: float,
+        value: float,
+    ) -> KheperaxImage:
         x, y = make_meshgrid(cfg, image)
 
         return jnp.where(
@@ -23,7 +36,15 @@ class RenderingTools:
         )
 
     @classmethod
-    def place_triangle(cls, cfg, image, point_1, point_2, point_3, value):
+    def place_triangle(
+        cls,
+        cfg: KheperaxConfig,
+        image: KheperaxImage,
+        point_1: jax.typing.ArrayLike,
+        point_2: jax.typing.ArrayLike,
+        point_3: jax.typing.ArrayLike,
+        value: float,
+    ) -> KheperaxImage:
         x, y = make_meshgrid(cfg, image)
 
         return jnp.where(
@@ -45,7 +66,15 @@ class RenderingTools:
         )
 
     @classmethod
-    def place_rectangle(cls, cfg, image, start, width, height, value):
+    def place_rectangle(
+        cls,
+        cfg: KheperaxConfig,
+        image: KheperaxImage,
+        start: jax.typing.ArrayLike,
+        width: float,
+        height: float,
+        value: float,
+    ) -> KheperaxImage:
         x, y = make_meshgrid(cfg, image)
 
         return jnp.where(
@@ -58,11 +87,13 @@ class RenderingTools:
         )
 
     @classmethod
-    def get_distance_point_to_segment(cls, point: Pos, segment: Segment):
+    def get_distance_point_to_segment(cls, point: Pos, segment: Segment) -> jax.Array:
         return Pos.calculate_projection_on_segment(point, segment).dist_to(point)
 
     @classmethod
-    def place_segments(cls, cfg, image, segments, value):
+    def place_segments(
+        cls, cfg: KheperaxConfig, image: KheperaxImage, segments: Segment, value: float
+    ) -> KheperaxImage:
         x, y = make_meshgrid(cfg, image)
 
         get_distance_point_to_segment_v = jax.vmap(

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 import flax.struct
 import jax
 import jax.numpy as jnp
@@ -14,10 +16,10 @@ class Pos(flax.struct.PyTreeNode):
     def __sub__(self, other: Pos) -> Pos:
         return Pos(self.x - other.x, self.y - other.y)
 
-    def dist_to(self, other: Pos) -> jnp.ndarray:
+    def dist_to(self, other: Pos) -> jax.Array:
         return self.dist_to_xy(other.x, other.y)
 
-    def dist_to_xy(self, x: float, y: float) -> jnp.ndarray:
+    def dist_to_xy(self, x: float, y: float) -> jax.Array:
         return jnp.linalg.norm(jnp.asarray([self.x, self.y]) - jnp.asarray([x, y]))
 
     def calculate_projection_on_segment(self, segment: Segment) -> Pos:
@@ -82,10 +84,10 @@ class Segment(flax.struct.PyTreeNode):
         x3, y3 = other.p1.x, other.p1.y
         x4, y4 = other.p2.x, other.p2.y
 
-        def is_false(_):
+        def is_false(_: Any) -> Pos:
             return Pos(jnp.inf, jnp.inf)
 
-        def is_true(_):
+        def is_true(_: Any) -> Pos:
             d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
 
             return Pos(

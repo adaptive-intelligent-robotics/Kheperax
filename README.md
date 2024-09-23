@@ -95,7 +95,8 @@ python -m examples.gif
 The `KheperaxTask` is configured using a `KheperaxConfig` object:
 
 ```python
-from kheperax.tasks.main import KheperaxConfig
+
+from kheperax.tasks.config import KheperaxConfig
 
 config = KheperaxConfig.get_default()
 ```
@@ -120,7 +121,8 @@ Key configuration options with their default values:
 Example of customizing the configuration:
 
 ```python
-from kheperax.tasks.main import KheperaxConfig
+
+from kheperax.tasks.config import KheperaxConfig
 from kheperax.simu.robot import Robot
 from kheperax.simu.maze import Maze
 
@@ -203,7 +205,8 @@ target_task = TargetKheperaxTask(target_config)
 To use a specific maze map:
 
 ```python
-from kheperax.tasks.main import KheperaxConfig
+
+from kheperax.tasks.config import KheperaxConfig
 from kheperax.tasks.target import TargetKheperaxConfig
 
 # Get the default configuration for the desired maze map
@@ -223,7 +226,8 @@ target_maze_map = TargetKheperaxConfig.get_default_for_map("standard")  # or "po
 To create a quad maze configuration:
 
 ```python
-from kheperax.tasks.main import KheperaxConfig
+
+from kheperax.tasks.config import KheperaxConfig
 from kheperax.tasks.target import TargetKheperaxConfig
 from kheperax.tasks.quad import make_quad_config
 

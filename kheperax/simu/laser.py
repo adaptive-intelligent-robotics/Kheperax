@@ -3,6 +3,7 @@ from __future__ import annotations
 import flax.struct
 import jax
 from jax import numpy as jnp
+from qdax.custom_types import RNGKey
 
 from kheperax.simu.geoms import Pos, Segment
 
@@ -27,10 +28,14 @@ class Laser(flax.struct.PyTreeNode):
         return self.get_segment().get_intersection_with(segment)
 
     def get_measure(
-        self, array_segments, return_minus_one_if_out_of_range, std_noise, random_key
-    ):
+        self,
+        tree_segments: Segment,
+        return_minus_one_if_out_of_range: bool,
+        std_noise: float,
+        random_key: RNGKey,
+    ) -> jax.Array:
 
-        all_measures = jax.vmap(self.get_measure_for_segment)(array_segments)
+        all_measures = jax.vmap(self.get_measure_for_segment)(tree_segments)
         measure = jnp.min(all_measures)
 
         random_key, subkey = jax.random.split(random_key)
@@ -48,5 +53,5 @@ class Laser(flax.struct.PyTreeNode):
 
         return measure
 
-    def get_measure_for_segment(self, segment):
+    def get_measure_for_segment(self, segment: Segment) -> jax.Array:
         return self.pos.dist_to(self.get_intersection_with_segment(segment))

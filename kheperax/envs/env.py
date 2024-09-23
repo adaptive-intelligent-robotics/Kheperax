@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 
 import jax
-import jax.numpy as jnp
 
 from kheperax.envs.kheperax_state import KheperaxState
 
@@ -12,11 +11,11 @@ class Env(abc.ABC):
     """API for driving an agent."""
 
     @abc.abstractmethod
-    def reset(self, rng: jnp.ndarray) -> KheperaxState:
+    def reset(self, rng: jax.typing.ArrayLike) -> KheperaxState:
         """Resets the environment to an initial state."""
 
     @abc.abstractmethod
-    def step(self, state: KheperaxState, action: jnp.ndarray) -> KheperaxState:
+    def step(self, state: KheperaxState, action: jax.typing.ArrayLike) -> KheperaxState:
         """Run one timestep of the environment's dynamics."""
 
     @property
@@ -24,7 +23,7 @@ class Env(abc.ABC):
         """The size of the observation vector returned in step and reset."""
         rng = jax.random.PRNGKey(0)
         reset_state = self.unwrapped.reset(rng)
-        return reset_state.obs.shape[-1]
+        return int(reset_state.obs.shape[-1])
 
     @property
     @abc.abstractmethod

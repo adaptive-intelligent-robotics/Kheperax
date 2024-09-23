@@ -1,16 +1,22 @@
+from __future__ import annotations
+
 import dataclasses
+from typing import Callable, Tuple
 
 import jax
 import numpy as np
 from jax import numpy as jnp
 from qdax.core.neuroevolution.networks.networks import MLP
+from qdax.custom_types import Descriptor, ExtraScores, Fitness, Genotype, RNGKey
 
+from kheperax.custom_types import KheperaxImage
 from kheperax.envs.kheperax_state import KheperaxState
 from kheperax.envs.maze_maps import get_target_maze_map
 from kheperax.envs.scoring import create_kheperax_scoring_fn, get_final_state_desc
 from kheperax.envs.wrappers import EpisodeWrapper
 from kheperax.simu.geoms import Pos, Segment
-from kheperax.tasks.main import KheperaxConfig, KheperaxTask
+from kheperax.tasks.config import KheperaxConfig
+from kheperax.tasks.main import KheperaxTask
 from kheperax.utils.rendering_tools import RenderingTools
 
 
@@ -20,11 +26,11 @@ class TargetKheperaxConfig(KheperaxConfig):
     target_radius: float
 
     @classmethod
-    def get_default(cls):
+    def get_default(cls) -> TargetKheperaxConfig:
         return cls.get_default_for_map("standard")
 
     @classmethod
-    def get_default_for_map(cls, map_name):
+    def get_default_for_map(cls, map_name: str) -> TargetKheperaxConfig:
         maze_map = get_target_maze_map(map_name)
         parent_config = KheperaxConfig.get_default_for_map(map_name)
 
@@ -36,11 +42,17 @@ class TargetKheperaxConfig(KheperaxConfig):
 
 
 class TargetKheperaxTask(KheperaxTask[TargetKheperaxConfig]):
-    def __init__(self, kheperax_config: TargetKheperaxConfig, **_):
+    def __init__(self, kheperax_config: TargetKheperaxConfig):
         super().__init__(kheperax_config)
 
     @classmethod
-    def create_default_task(cls, kheperax_config: TargetKheperaxConfig, random_key):
+    def create_default_task(
+        cls, kheperax_config: TargetKheperaxConfig, random_key: RNGKey
+    ) -> Tuple[
+        EpisodeWrapper,
+        MLP,
+        Callable[[Genotype, RNGKey], Tuple[Fitness, Descriptor, ExtraScores, RNGKey]],
+    ]:
         env = cls(kheperax_config)
         env_wrapper = EpisodeWrapper(
             env,
@@ -69,7 +81,7 @@ class TargetKheperaxTask(KheperaxTask[TargetKheperaxConfig]):
 
         return env_wrapper, policy_network, scoring_fn
 
-    def step(self, state: KheperaxState, action: jnp.ndarray) -> KheperaxState:
+    def step(self, state: KheperaxState, action: jax.typing.ArrayLike) -> KheperaxState:
         random_key = state.random_key
 
         # actions should be between -1 and 1
@@ -109,7 +121,7 @@ class TargetKheperaxTask(KheperaxTask[TargetKheperaxConfig]):
         random_key, subkey = jax.random.split(random_key)
         new_random_key = subkey
 
-        return state.replace(
+        return state.replace(  # type: ignore
             maze=state.maze,
             robot=new_robot,
             obs=obs,
@@ -121,7 +133,7 @@ class TargetKheperaxTask(KheperaxTask[TargetKheperaxConfig]):
     def render(
         self,
         state: KheperaxState,
-    ) -> jnp.ndarray:
+    ) -> jax.Array:
         image = self.create_image(state)
         image = self.add_robot(image, state)
         image = self.render_rgb_image(image)
@@ -130,7 +142,7 @@ class TargetKheperaxTask(KheperaxTask[TargetKheperaxConfig]):
     def create_image(
         self,
         state: KheperaxState,
-    ) -> jnp.ndarray:
+    ) -> KheperaxImage:
         # WARNING: only consider the maze is in the unit square
         image = jnp.zeros(self.kheperax_config.resolution, dtype=jnp.float32)
 
@@ -153,7 +165,7 @@ class TargetKheperaxTask(KheperaxTask[TargetKheperaxConfig]):
 
         return image
 
-    def add_robot(self, image, state: KheperaxState):
+    def add_robot(self, image: KheperaxImage, state: KheperaxState) -> KheperaxImage:
         coeff_triangle = 3.0
         image = RenderingTools.place_triangle(
             self.kheperax_config,
@@ -192,7 +204,7 @@ class TargetKheperaxTask(KheperaxTask[TargetKheperaxConfig]):
         )
         return image
 
-    def add_lasers(self, image, state: KheperaxState):
+    def add_lasers(self, image: KheperaxImage, state: KheperaxState) -> jax.Array:
         robot = state.robot
         maze = state.maze
         laser_measures = robot.laser_measures(maze, random_key=state.random_key)
@@ -233,7 +245,9 @@ class TargetKheperaxTask(KheperaxTask[TargetKheperaxConfig]):
 
         return image
 
-    def render_rgb_image(self, image, flip=False):
+    def render_rgb_image(
+        self, image: KheperaxImage, flip: bool = False
+    ) -> KheperaxImage:
         # Add 2 empty channels
         empty = -jnp.inf + jnp.ones(image.shape[:2])
         rgb_image = jnp.stack([image, empty, empty], axis=-1)
@@ -258,7 +272,7 @@ class TargetKheperaxTask(KheperaxTask[TargetKheperaxConfig]):
             7.0: cyan,
         }
 
-        def colorize(x, _color_id, _rgb):
+        def colorize(x: jax.typing.ArrayLike, _color_id: int, _rgb: float) -> jax.Array:
             return jnp.where(jnp.isclose(x[0], _color_id), _rgb * 255, x)
 
         for color_id, rgb in index_to_color.items():

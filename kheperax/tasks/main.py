@@ -1,76 +1,41 @@
 from __future__ import annotations
 
-import dataclasses
 from functools import partial
-from typing import Generic, Tuple
+from typing import Callable, Generic, Tuple
 
 import jax.tree_util
 from jax import numpy as jnp
 from qdax.core.neuroevolution.networks.networks import MLP
+from qdax.custom_types import Action, Descriptor, ExtraScores, Fitness, Genotype, RNGKey
 from typing_extensions import TypeVar
 
+from kheperax.custom_types import KheperaxImage
 from kheperax.envs.env import Env
 from kheperax.envs.kheperax_state import KheperaxState
-from kheperax.envs.maze_maps import get_target_maze_map
 from kheperax.envs.scoring import create_kheperax_scoring_fn, get_final_state_desc
 from kheperax.envs.wrappers import EpisodeWrapper
 from kheperax.simu.maze import Maze
 from kheperax.simu.robot import Robot
+from kheperax.tasks.config import KheperaxConfig
 from kheperax.utils.rendering_tools import RenderingTools
-
-DEFAULT_RESOLUTION = (1024, 1024)
-
-
-@dataclasses.dataclass
-class KheperaxConfig:
-    episode_length: int
-    mlp_policy_hidden_layer_sizes: Tuple[int, ...]
-    action_scale: float
-    maze: Maze
-    robot: Robot
-    std_noise_wheel_velocities: float
-    resolution: Tuple[int, int]
-    limits: Tuple[Tuple[float, float], Tuple[float, float]]
-    action_repeat: int
-
-    @classmethod
-    def get_default(cls):
-        return cls.get_default_for_map("standard")
-
-    @classmethod
-    def get_default_for_map(cls, map_name):
-        maze_map = get_target_maze_map(map_name)
-        return cls(
-            episode_length=1000,
-            mlp_policy_hidden_layer_sizes=(8,),
-            resolution=DEFAULT_RESOLUTION,
-            action_scale=0.025,
-            maze=Maze.create(segments_list=maze_map.segments),
-            robot=Robot.create_default_robot(),
-            std_noise_wheel_velocities=0.0,
-            limits=((0.0, 0.0), (1.0, 1.0)),
-            action_repeat=1,
-        )
-
-    def to_dict(self):
-        return {
-            field.name: getattr(self, field.name) for field in dataclasses.fields(self)
-        }
-
 
 ConfigT = TypeVar("ConfigT", bound=KheperaxConfig)
 
 
 class KheperaxTask(Env, Generic[ConfigT]):
-    def __init__(self, kheperax_config: ConfigT, **_):
+    def __init__(self, kheperax_config: ConfigT):
         self.kheperax_config = kheperax_config
 
     @classmethod
     def create_default_task(
         cls,
         kheperax_config: ConfigT,
-        random_key,
-    ):
+        random_key: RNGKey,
+    ) -> Tuple[
+        EpisodeWrapper,
+        MLP,
+        Callable[[Genotype, RNGKey], Tuple[Fitness, Descriptor, ExtraScores, RNGKey]],
+    ]:
         env = cls(kheperax_config)
         ep_wrapper_env = EpisodeWrapper(
             env,
@@ -99,10 +64,10 @@ class KheperaxTask(Env, Generic[ConfigT]):
 
         return ep_wrapper_env, policy_network, scoring_fn
 
-    def get_xy_pos(self, robot: Robot):
+    def get_xy_pos(self, robot: Robot) -> jax.Array:
         return jnp.asarray([robot.posture.x, robot.posture.y])
 
-    def reset(self, random_key: jnp.ndarray) -> KheperaxState:
+    def reset(self, random_key: jax.typing.ArrayLike) -> KheperaxState:
         robot = self.kheperax_config.robot
 
         random_key, subkey = jax.random.split(random_key)
@@ -126,7 +91,7 @@ class KheperaxTask(Env, Generic[ConfigT]):
             random_key=subkey,
         )
 
-    def _get_wheel_velocities(self, action, random_key):
+    def _get_wheel_velocities(self, action: Action, random_key: RNGKey) -> jax.Array:
         random_key, subkey = jax.random.split(random_key)
         noise_wheel_velocities = (
             jax.random.normal(subkey, shape=action.shape)
@@ -140,7 +105,7 @@ class KheperaxTask(Env, Generic[ConfigT]):
 
         return wheel_velocities
 
-    def step(self, state: KheperaxState, action: jnp.ndarray) -> KheperaxState:
+    def step(self, state: KheperaxState, action: jax.typing.ArrayLike) -> KheperaxState:
         random_key = state.random_key
 
         # actions should be between -1 and 1
@@ -169,7 +134,7 @@ class KheperaxTask(Env, Generic[ConfigT]):
         random_key, subkey = jax.random.split(random_key)
         new_random_key = subkey
 
-        return state.replace(
+        return state.replace(  # type: ignore
             maze=state.maze,
             robot=new_robot,
             obs=obs,
@@ -179,8 +144,12 @@ class KheperaxTask(Env, Generic[ConfigT]):
         )
 
     def _get_obs(
-        self, robot: Robot, maze: Maze, random_key, bumper_measures: jnp.ndarray = None
-    ) -> jnp.ndarray:
+        self,
+        robot: Robot,
+        maze: Maze,
+        random_key: RNGKey,
+        bumper_measures: jax.typing.ArrayLike = None,
+    ) -> jax.Array:
         random_key, subkey = jax.random.split(random_key)
         laser_measures = robot.laser_measures(maze, random_key=subkey)
 
@@ -220,7 +189,7 @@ class KheperaxTask(Env, Generic[ConfigT]):
     def render(
         self,
         state: KheperaxState,
-    ) -> jnp.ndarray:
+    ) -> KheperaxImage:
         # WARNING: only consider the maze is in the unit square
         coeff_triangle = 3.0
         image = jnp.zeros(self.kheperax_config.resolution, dtype=jnp.float32)
@@ -280,10 +249,10 @@ class KheperaxTask(Env, Generic[ConfigT]):
             5.0: black,
         }
 
-        def _map_colors(x):
+        def _map_colors(x: jax.typing.ArrayLike) -> jax.Array:
             new_array = jnp.zeros((3,))
 
-            def identity_fn(_, x):
+            def identity_fn(_: jax.typing.ArrayLike, x: float) -> float:
                 return x
 
             for index_color, value_color in index_to_color.items():

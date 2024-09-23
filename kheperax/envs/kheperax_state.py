@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict
 
 import flax.struct
-from jax import numpy as jnp
+import jax
 from qdax.custom_types import RNGKey
 
 from kheperax.simu.maze import Maze
@@ -17,9 +17,9 @@ class KheperaxState(flax.struct.PyTreeNode):
 
     robot: Robot
     maze: Maze
-    obs: jnp.ndarray
-    reward: jnp.ndarray
-    done: jnp.ndarray
+    obs: jax.typing.ArrayLike
+    reward: jax.typing.ArrayLike
+    done: jax.typing.ArrayLike
     random_key: RNGKey
-    metrics: Dict[str, jnp.ndarray] = flax.struct.field(default_factory=dict)
+    metrics: Dict[str, jax.typing.ArrayLike] = flax.struct.field(default_factory=dict)
     info: Dict[str, Any] = flax.struct.field(default_factory=dict)

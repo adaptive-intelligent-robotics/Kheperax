@@ -5,10 +5,11 @@ from pathlib import Path
 import jax.random
 from matplotlib import pyplot as plt
 
-from kheperax.tasks.main import KheperaxConfig, KheperaxTask
+from kheperax.tasks.config import KheperaxConfig
+from kheperax.tasks.main import KheperaxTask
 
 
-def example_usage_render():
+def example_usage_render() -> None:
 
     random_key = jax.random.PRNGKey(1)
 

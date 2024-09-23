@@ -15,7 +15,7 @@ from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
-def example_usage_gif(map_name="standard"):
+def example_usage_gif(map_name: str = "standard") -> None:
     print(f"Rendering GIF {map_name}")
 
     random_key = jax.random.PRNGKey(1)
@@ -71,7 +71,7 @@ def example_usage_gif(map_name="standard"):
     )
 
 
-def run_example():
+def run_example() -> None:
     map_name = "standard"
     # map_name='pointmaze'
     # map_name='snake'

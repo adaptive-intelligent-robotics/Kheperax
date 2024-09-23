@@ -28,7 +28,7 @@ from kheperax.tasks.target import TargetKheperaxConfig
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
-def run_me(map_name="standard") -> None:
+def run_me(map_name: str = "standard") -> None:
     print(f"Running MAP-Elites on {map_name}")
 
     seed = 42
@@ -203,7 +203,7 @@ def run_me(map_name="standard") -> None:
     print(f"Saved gif: {save_folder / name_file}")
 
 
-def run_example():
+def run_example() -> None:
     map_name = "standard"
     # map_name='pointmaze'
     # map_name='snake'

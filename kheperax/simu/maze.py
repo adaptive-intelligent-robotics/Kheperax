@@ -52,7 +52,7 @@ class Maze(flax.struct.PyTreeNode):
         cls,
         segments_list: Optional[List[Segment]] = None,
         limits: Optional[Tuple[Tuple[float, float], Tuple[float, float]]] = None,
-    ):
+    ) -> Maze:
         """
         Create a maze from a list of segments and border limits.
 

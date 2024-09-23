@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any, Tuple
+
 import jax
 from jax import numpy as jnp
 
@@ -13,10 +15,10 @@ class Wrapper(Env):
     def __init__(self, env: Env):
         self.env = env
 
-    def reset(self, rng: jnp.ndarray) -> KheperaxState:
+    def reset(self, rng: jax.typing.ArrayLike) -> KheperaxState:
         return self.env.reset(rng)
 
-    def step(self, state: KheperaxState, action: jnp.ndarray) -> KheperaxState:
+    def step(self, state: KheperaxState, action: jax.typing.ArrayLike) -> KheperaxState:
         return self.env.step(state, action)
 
     @property
@@ -31,7 +33,7 @@ class Wrapper(Env):
     def unwrapped(self) -> Env:
         return self.env.unwrapped
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         if name == "__setstate__":
             raise AttributeError(name)
         return getattr(self.env, name)
@@ -45,7 +47,7 @@ class EpisodeWrapper(Wrapper):
         self.episode_length = episode_length
         self.action_repeat = action_repeat
 
-    def reset(self, rng: jnp.ndarray) -> KheperaxState:
+    def reset(self, rng: jax.typing.ArrayLike) -> KheperaxState:
         state = self.env.reset(rng)
         state.info["steps"] = jnp.zeros(rng.shape[:-1])
         state.info["truncation"] = jnp.zeros(rng.shape[:-1])
@@ -54,8 +56,8 @@ class EpisodeWrapper(Wrapper):
         )
         return state
 
-    def step(self, state: KheperaxState, action: jnp.ndarray) -> KheperaxState:
-        def f(state, _):
+    def step(self, state: KheperaxState, action: jax.typing.ArrayLike) -> KheperaxState:
+        def f(state: KheperaxState, _: Any) -> Tuple[KheperaxState, jax.Array]:
             nstate = self.env.step(state, action)
             return nstate, nstate.reward
 
@@ -73,4 +75,4 @@ class EpisodeWrapper(Wrapper):
             state.info["truncation"], dtype=jnp.int32
         )
         state.info["steps"] = steps
-        return state.replace(done=done)
+        return state.replace(done=done)  # type: ignore

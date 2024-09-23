@@ -2,10 +2,11 @@ from typing import Callable, Tuple
 
 import flax.linen as nn
 import jax
+from chex import ArrayTree
 from jax import numpy as jnp
 from qdax.core.neuroevolution.buffers.buffer import QDTransition
 from qdax.core.neuroevolution.networks.networks import MLP
-from qdax.custom_types import Params, RNGKey
+from qdax.custom_types import Descriptor, ExtraScores, Fitness, Genotype, Params, RNGKey
 
 from kheperax.envs.env import Env
 from kheperax.envs.kheperax_state import KheperaxState
@@ -17,7 +18,7 @@ from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 def make_final_policy_network_play_step_fn(  # TODO: ?
     env: Env,
     policy_network: nn.Module,
-) -> Callable[[KheperaxState, Params, RNGKey], Tuple[KheperaxState, QDTransition]]:
+) -> Callable[[Params, KheperaxState, RNGKey], Tuple[KheperaxState, QDTransition]]:
     """
     Creates a function that when called, plays a step of the environment.
 
@@ -31,8 +32,8 @@ def make_final_policy_network_play_step_fn(  # TODO: ?
     """
 
     def final_play_step_fn(
-        env_state: KheperaxState,
         policy_params: Params,
+        env_state: KheperaxState,
         key: RNGKey,
     ) -> Tuple[KheperaxState, QDTransition]:
         """
@@ -98,8 +99,12 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
     def create_default_task(
         cls,
         kheperax_config: TargetKheperaxConfig,
-        random_key,
-    ):
+        random_key: RNGKey,
+    ) -> Tuple[
+        EpisodeWrapper,
+        ArrayTree,
+        Callable[[Genotype, RNGKey], Tuple[Fitness, Descriptor, ExtraScores, RNGKey]],
+    ]:
         env = cls(kheperax_config)
         env_wrapper = EpisodeWrapper(
             env,
@@ -134,7 +139,7 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
 
         return env_wrapper, policy_network, scoring_fn
 
-    def step(self, state: KheperaxState, action: jnp.ndarray) -> KheperaxState:
+    def step(self, state: KheperaxState, action: jax.typing.ArrayLike) -> KheperaxState:
         random_key = state.random_key
 
         # actions should be between -1 and 1
@@ -181,7 +186,7 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
         random_key, subkey = jax.random.split(random_key)
         new_random_key = subkey
 
-        return state.replace(
+        return state.replace(  # type: ignore
             maze=state.maze,
             robot=new_robot,
             obs=obs,
