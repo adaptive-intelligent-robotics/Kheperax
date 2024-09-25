@@ -66,7 +66,7 @@ def run_me() -> None:
     # Init population of controllers
     random_key, subkey = jax.random.split(random_key)
 
-    # Define emitter
+    # Define QDax emitter
     variation_fn = functools.partial(
         isoline_variation,
         iso_sigma=iso_sigma,
