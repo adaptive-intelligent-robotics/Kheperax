@@ -1,5 +1,3 @@
-from kheperax.tasks.main import KheperaxConfig
-
 # Kheperax
 
 The *Kheperax* task is a re-implementation of the [`fastsim` simulator](https://github.com/sferes2/libfastsim) from _Mouret and Doncieux (2012)_.
@@ -15,10 +13,10 @@ Kheperax is fully written using [JAX](https://github.com/google/jax), to leverag
 - Rendering capabilities for visualizing the environment
 
 <p align="center">
-  <img src="img/gif/mapelites_progress_standard.gif" width="150" />
-  <img src="img/gif/target_policy_standard.gif" width="150" />
-  <img src="img/gif/unstructured_progress_snake.gif" width="150" />
-  <img src="img/gif/target_policy_snake.gif" width="150" />
+  <img src="img/gif/mapelites_progress_standard.gif" width="160" height="160" />
+  <img src="img/gif/target_policy_standard.gif" width="160" height="160" />
+  <img src="img/gif/unstructured_progress_snake.gif" width="160" height="160"/>
+  <img src="img/gif/target_policy_snake.gif" width="160" height="160"/>
 </p>
 
 ## Installation
@@ -53,11 +51,6 @@ The bumpers return `1` if there's a contact with a wall and `-1` otherwise.
 
 The actions to pass to the environment should be between `-1` and `1`.
 They are then scaled depending on a scale defined in the environment configuration.
-
-### Quality-Diversity Properties
-
-- Fitness: sum of negated norm of actions (-1 * sum of norm a_t, ~negated energy)
-- Descriptor: final 2-dimensional location of the robot.
 
 ## Run examples
 
@@ -105,9 +98,23 @@ Kheperax supports various tasks and maze types. Here's an overview of the availa
 - **Class**: `KheperaxTask`
 - **Configuration**: `KheperaxConfig`
 - **Description**: The standard Kheperax environment without a specific target.
+- **Fitness**: sum of rewards
+- **Reward**: negated norm of actions, r_t = -1 * norm a_t (i.e. r_t ~ negated energy spent at time t)
+- **Descriptor**: final (x,y) location of the robot.
 
-The `KheperaxTask` is configured using a `KheperaxConfig` object:
+#### Key Features:
 
+- **Reward Function**:
+   - negated norm of actions, r_t = -1 * norm a_t (i.e. r_t ~ negated energy spent at time t)
+   - This encourages the robot to move efficiently.
+-  **Episode Termination**:
+   - The episode terminates if the maximum number of steps is reached.
+-  **Rendering**:
+   - When rendered, the target appears as a green circle in the maze.
+
+#### Configuration
+
+ A `KheperaxConfig` object contains all the properties of a `KheperaxTask`:
 ```python
 
 from kheperax.tasks.config import KheperaxConfig
@@ -132,7 +139,7 @@ Key configuration options with their default values:
 - `limits`: `Tuple[Tuple[float, float], Tuple[float, float]] = ((0., 0.), (1., 1.))`, environment boundaries
 - `action_repeat`: `int = 1`, number of times each action is repeated
 
-Example of customizing the configuration:
+#### Usage Example
 
 ```python
 
@@ -158,13 +165,11 @@ config.maze = new_maze
 - **Class**: `TargetKheperaxTask`
 - **Configuration**: `TargetKheperaxConfig`
 - **Description**: Kheperax environment with a target position for the robot to reach.
+- **Fitness**: sum of rewards (detailed below)
+- **Descriptor**: final (x,y) location of the robot.
 
 #### Key Features:
-- `TargetKheperaxConfig` contains the same parameters as `KheperaxConfig`, plus additional target-related parameters:
-  - **Target Position**: Defines a specific point in the maze for the robot to reach. Default position: `(0.15, 0.9)`
-  - **Target Radius**: Specifies the size of the target area.
-     - Default radius: 0.05
-     - The episode ends when the robot enters this radius.
+
 - **Reward Function**:
    - At each step, the reward is the negative distance to the target center.
    - This encourages the robot to move towards the target.
@@ -173,6 +178,14 @@ config.maze = new_maze
    - Also terminates if the maximum number of steps is reached.
 -  **Rendering**:
    - When rendered, the target appears as a green circle in the maze.
+
+#### Configuration
+
+`TargetKheperaxConfig` contains the same parameters as `KheperaxConfig`, plus additional target-related parameters:
+- **Target Position**: Defines a specific point in the maze for the robot to reach. Default position: `(0.15, 0.9)`
+- **Target Radius**: Specifies the size of the target area.
+   - Default radius: 0.05
+   - The episode ends when the robot enters this radius.
 
 #### Usage Example:
 ```python
@@ -196,8 +209,18 @@ target_task = TargetKheperaxTask(target_config)
 - **File**: `kheperax/tasks/final_distance.py`
 - **Class**: `FinalDistKheperaxTask`
 - **Description**: A task that only rewards the final distance to the target.
+- **Fitness**: sum of rewards (detailed below)
+- **Descriptor**: final (x,y) location of the robot.
 
-[//]: # (Add more details about the final distance task)
+#### Key Features:
+- **Reward Function**:
+   - At each step, the reward is -1, except for the final step, where the reward is 100 * the negative distance to the target center.
+   - This encourages the robot to move towards the target.
+-  **Episode Termination**:
+   - The episode ends when the robot reaches the target (enters the target radius).
+   - Also terminates if the maximum number of steps is reached.
+
+`TargetKheperaxConfig` is still used to manage the configuration for this kind of task (see above description)
 
 ### Maze Maps
 - **File**: `kheperax/envs/maze_maps.py`
