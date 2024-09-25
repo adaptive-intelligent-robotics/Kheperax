@@ -72,22 +72,31 @@ pip install jax[cuda12]==<version-from-requirements.txt>
 
 ### Launch MAP-Elites Example
 
-```shell
-python -m examples.me_training
-```
+To run the MAP-Elites example on the standard Kheperax task, you can use the following colab notebook:
 
-### Test Rendering a Maze Image
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/adaptive-intelligent-robotics/Kheperax/blob/main/examples/main/me_training.ipynb)
 
-```shell
-python -m examples.rendering
-```
-
-### Test Rendering a GIF
+Other tasks can be run with the following scripts.
 
 ```shell
-python -m examples.gif
+python -m examples.target.target_me_training  # Target task with MAP-Elites
+
+python -m examples.final_distance.final_distance_me_training  # Final Distance task with MAP-Elites
 ```
 
+Additional details on those tasks can be found in the [Tasks and Maze Types](#tasks-and-maze-types) section.
+
+### Rendering images and gifs
+
+To render images, you can run the following script:
+```shell
+python -m examples.rendering.maps_rendering
+```
+
+To render gifs, you can run the following script:
+```shell
+python -m examples.rendering.gif
+```
 
 ## Tasks and Maze Types
 
@@ -139,8 +148,7 @@ Key configuration options with their default values:
 - `limits`: `Tuple[Tuple[float, float], Tuple[float, float]] = ((0., 0.), (1., 1.))`, environment boundaries
 - `action_repeat`: `int = 1`, number of times each action is repeated
 
-#### Usage Example
-
+Usage example:
 ```python
 
 from kheperax.tasks.config import KheperaxConfig
@@ -187,7 +195,7 @@ config.maze = new_maze
    - Default radius: 0.05
    - The episode ends when the robot enters this radius.
 
-#### Usage Example:
+Usage example:
 ```python
 from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
