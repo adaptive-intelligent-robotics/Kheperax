@@ -4,7 +4,6 @@ import dataclasses
 from typing import Callable, Tuple
 
 import jax
-import numpy as np
 from jax import numpy as jnp
 from qdax.core.neuroevolution.networks.networks import MLP
 from qdax.custom_types import Descriptor, ExtraScores, Fitness, Genotype, RNGKey
@@ -14,7 +13,6 @@ from kheperax.envs.kheperax_state import KheperaxState
 from kheperax.envs.maze_maps import get_target_maze_map
 from kheperax.envs.scoring import create_kheperax_scoring_fn, get_final_state_desc
 from kheperax.envs.wrappers import EpisodeWrapper
-from kheperax.simu.geoms import Pos, Segment
 from kheperax.tasks.config import KheperaxConfig
 from kheperax.tasks.main import KheperaxTask
 from kheperax.utils.rendering_tools import RenderingTools
@@ -99,19 +97,12 @@ class TargetKheperaxTask(KheperaxTask[TargetKheperaxConfig]):
             new_robot, state.maze, bumper_measures=bumper_measures, random_key=subkey
         )
 
-        # Standard: reward penalizes high action values
-        # reward = -1. * jnp.power(jnp.linalg.norm(wheel_velocities), 2.)
-
         # Reward is the distance to the target
         target_dist = jnp.linalg.norm(
             jnp.array(self.kheperax_config.target_pos)
             - jnp.array(self.get_xy_pos(new_robot))
         )
         reward = -1.0 * target_dist
-        # reward = -1.
-
-        # Standard: only stop at the end of the episode
-        # done = False
 
         # done if the robot is in the target
         done = target_dist < self.kheperax_config.target_radius
@@ -129,15 +120,6 @@ class TargetKheperaxTask(KheperaxTask[TargetKheperaxConfig]):
             done=done,
             random_key=new_random_key,
         )
-
-    def render(
-        self,
-        state: KheperaxState,
-    ) -> jax.Array:
-        image = self.create_image(state)
-        image = self.add_robot(image, state)
-        image = self.render_rgb_image(image)
-        return image
 
     def create_image(
         self,
@@ -164,125 +146,3 @@ class TargetKheperaxTask(KheperaxTask[TargetKheperaxConfig]):
         )
 
         return image
-
-    def add_robot(self, image: KheperaxImage, state: KheperaxState) -> KheperaxImage:
-        coeff_triangle = 3.0
-        image = RenderingTools.place_triangle(
-            self.kheperax_config,
-            image,
-            point_1=(
-                state.robot.posture.x
-                + coeff_triangle
-                * state.robot.radius
-                * jnp.cos(state.robot.posture.angle),
-                state.robot.posture.y
-                + coeff_triangle
-                * state.robot.radius
-                * jnp.sin(state.robot.posture.angle),
-            ),
-            point_2=(
-                state.robot.posture.x
-                + state.robot.radius * jnp.cos(state.robot.posture.angle - jnp.pi / 2),
-                state.robot.posture.y
-                + state.robot.radius * jnp.sin(state.robot.posture.angle - jnp.pi / 2),
-            ),
-            point_3=(
-                state.robot.posture.x
-                + state.robot.radius * jnp.cos(state.robot.posture.angle + jnp.pi / 2),
-                state.robot.posture.y
-                + state.robot.radius * jnp.sin(state.robot.posture.angle + jnp.pi / 2),
-            ),
-            value=2.0,
-        )
-
-        image = RenderingTools.place_circle(
-            self.kheperax_config,
-            image,
-            center=(state.robot.posture.x, state.robot.posture.y),
-            radius=state.robot.radius,
-            value=1.0,
-        )
-        return image
-
-    def add_lasers(self, image: KheperaxImage, state: KheperaxState) -> jax.Array:
-        robot = state.robot
-        maze = state.maze
-        laser_measures = robot.laser_measures(maze, random_key=state.random_key)
-
-        # Replace -1 by the max range, make yellow
-        laser_colors = jnp.where(
-            jnp.isclose(laser_measures, -1.0),
-            6.0,
-            4.0,
-        )
-        laser_measures = jnp.where(
-            jnp.isclose(laser_measures, -1.0),
-            robot.laser_ranges,
-            laser_measures,
-        )
-        laser_relative_angles = robot.laser_angles
-        robot_angle = robot.posture.angle
-        laser_angles = laser_relative_angles + robot_angle
-
-        robot_pos = Pos.from_posture(robot.posture)
-        # segments = []
-        for laser_measure, laser_angle, laser_color in zip(
-            laser_measures, laser_angles, laser_colors
-        ):
-            laser_x = robot_pos.x + laser_measure * jnp.cos(laser_angle)
-            laser_y = robot_pos.y + laser_measure * jnp.sin(laser_angle)
-            laser_pos = Pos(x=laser_x, y=laser_y)
-            laser_segment = Segment(robot_pos, laser_pos)
-            # segments.append(laser_segment)
-
-            segments = jax.tree_util.tree_map(
-                lambda *x: jnp.asarray(x, dtype=jnp.float32), *[laser_segment]
-            )
-
-            image = RenderingTools.place_segments(
-                self.kheperax_config, image, segments, value=laser_color
-            )
-
-        return image
-
-    def render_rgb_image(
-        self, image: KheperaxImage, flip: bool = False
-    ) -> KheperaxImage:
-        # Add 2 empty channels
-        empty = -jnp.inf + jnp.ones(image.shape[:2])
-        rgb_image = jnp.stack([image, empty, empty], axis=-1)
-
-        white = jnp.array([1.0, 1.0, 1.0])
-        blue = jnp.array([0.0, 0.0, 1.0])
-        red = jnp.array([1.0, 0.0, 0.0])
-        green = jnp.array([0.0, 1.0, 0.0])
-        magenta = jnp.array([0.5, 0.0, 1.0])
-        cyan = jnp.array([0.0, 1.0, 1.0])
-        yellow = jnp.array([1.0, 1.0, 0.0])
-        black = jnp.array([0.0, 0.0, 0.0])
-
-        index_to_color = {
-            0.0: white,
-            1.0: blue,
-            2.0: magenta,
-            3.0: green,
-            4.0: red,
-            5.0: black,
-            6.0: yellow,
-            7.0: cyan,
-        }
-
-        def colorize(x: jax.typing.ArrayLike, _color_id: int, _rgb: float) -> jax.Array:
-            return jnp.where(jnp.isclose(x[0], _color_id), _rgb * 255, x)
-
-        for color_id, rgb in index_to_color.items():
-            colorize_color_fn = jax.partial(colorize, _color_id=color_id, _rgb=rgb)
-            rgb_image = jax.vmap(jax.vmap(colorize_color_fn))(rgb_image)
-
-        rgb_image = jnp.array(rgb_image).astype("uint8")
-
-        if flip:
-            rgb_image = rgb_image[::-1, :, :]
-
-        rgb_image = np.array(rgb_image)
-        return rgb_image

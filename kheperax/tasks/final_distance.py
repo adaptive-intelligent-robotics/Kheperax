@@ -1,8 +1,8 @@
+from functools import partial
 from typing import Callable, Tuple
 
 import flax.linen as nn
 import jax
-from chex import ArrayTree
 from jax import numpy as jnp
 from qdax.core.neuroevolution.buffers.buffer import QDTransition
 from qdax.core.neuroevolution.networks.networks import MLP
@@ -15,23 +15,14 @@ from kheperax.envs.wrappers import EpisodeWrapper
 from kheperax.tasks.target import TargetKheperaxConfig, TargetKheperaxTask
 
 
-def make_final_policy_network_play_step_fn(  # TODO: ?
-    env: Env,
-    policy_network: nn.Module,
-) -> Callable[[Params, KheperaxState, RNGKey], Tuple[KheperaxState, QDTransition]]:
-    """
-    Creates a function that when called, plays a step of the environment.
+class FinalDistKheperaxTask(TargetKheperaxTask):
+    """Kheperax task that only rewards the final distance to the target"""
 
-    Args:
-        env: The BRAX environment.
-        policy_network:  The policy network structure used for creating and evaluating
-            policy controllers.
-
-    Returns:
-        default_play_step_fn: A function that plays a step of the environment.
-    """
-
+    @classmethod
     def final_play_step_fn(
+        cls,
+        policy_network: nn.Module,
+        env: Env,
         policy_params: Params,
         env_state: KheperaxState,
         key: RNGKey,
@@ -45,8 +36,6 @@ def make_final_policy_network_play_step_fn(  # TODO: ?
 
         Returns:
             next_state: The updated environment state.
-            policy_params: The parameters of policies/controllers (unchanged).
-            random_key: The updated random key.
             transition: containing some information about the transition: observation,
                 reward, next observation, policy action...
         """
@@ -65,15 +54,7 @@ def make_final_policy_network_play_step_fn(  # TODO: ?
             next_state.reward - 1,
             -1 * jnp.ones_like(next_state.reward),
         )
-        # Use 1.0 reward at each step after done
-        # early_stop_reward = jnp.where(
-        #     jnp.logical_and(
-        #         next_state.done,
-        #         env_state.done,
-        #     ),
-        #     jnp.ones_like(next_state.reward),
-        #     jnp.zeros_like(next_state.reward),
-        # )
+
         final_reward = distance_reward
 
         transition = QDTransition(
@@ -89,12 +70,6 @@ def make_final_policy_network_play_step_fn(  # TODO: ?
 
         return next_state, transition
 
-    return final_play_step_fn
-
-
-class FinalDistKheperaxTask(TargetKheperaxTask):
-    """Kheperax task that only rewards the final distance to the target"""
-
     @classmethod
     def create_default_task(
         cls,
@@ -102,7 +77,7 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
         random_key: RNGKey,
     ) -> Tuple[
         EpisodeWrapper,
-        ArrayTree,
+        MLP,
         Callable[[Genotype, RNGKey], Tuple[Fitness, Descriptor, ExtraScores, RNGKey]],
     ]:
         env = cls(kheperax_config)
@@ -124,9 +99,10 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
 
         bd_extraction_fn = get_final_state_desc
 
-        play_step_fn = make_final_policy_network_play_step_fn(
-            env_wrapper,
+        play_step_fn = partial(
+            cls.final_play_step_fn,
             policy_network,
+            env_wrapper,
         )
 
         scoring_fn = create_kheperax_scoring_fn(
@@ -157,19 +133,12 @@ class FinalDistKheperaxTask(TargetKheperaxTask):
             new_robot, state.maze, bumper_measures=bumper_measures, random_key=subkey
         )
 
-        # Standard: reward penalizes high action values
-        # reward = -1. * jnp.power(jnp.linalg.norm(wheel_velocities), 2.)
-
         # Reward is the distance to the target * 100
         target_dist = jnp.linalg.norm(
             jnp.array(self.kheperax_config.target_pos)
             - jnp.array(self.get_xy_pos(new_robot))
         )
         reward = -100 * target_dist
-        # reward = -1.
-
-        # Standard: only stop at the end of the episode
-        # done = False
 
         # done if the robot is in the target of if already done
         done = target_dist < self.kheperax_config.target_radius

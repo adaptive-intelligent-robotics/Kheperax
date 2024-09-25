@@ -90,7 +90,16 @@ python -m examples.rendering
 python -m examples.gif
 ```
 
-## Task Configuration
+
+## Tasks and Maze Types
+
+Kheperax supports various tasks and maze types. Here's an overview of the available options and their corresponding files:
+
+### Basic Kheperax Task
+- **File**: `kheperax/tasks/main.py`
+- **Class**: `KheperaxTask`
+- **Configuration**: `KheperaxConfig`
+- **Description**: The standard Kheperax environment without a specific target.
 
 The `KheperaxTask` is configured using a `KheperaxConfig` object:
 
@@ -138,16 +147,6 @@ config.robot = new_robot
 new_maze = Maze.create(segments_list=[...])  # Define maze segments
 config.maze = new_maze
 ```
-
-
-## Tasks and Maze Types
-
-Kheperax supports various tasks and maze types. Here's an overview of the available options and their corresponding files:
-
-### Basic Kheperax Task
-- **File**: `kheperax/tasks/main.py`
-- **Class**: `KheperaxTask`
-- **Description**: The standard Kheperax environment without a specific target.
 
 ### Target Kheperax Task
 - **File**: `kheperax/tasks/target.py`
@@ -238,7 +237,6 @@ target_maze_map = TargetKheperaxConfig.get_default_for_map("standard")  # or "po
 # Create a quad maze configuration
 quad_config = make_quad_config(maze_map)  # or target_maze_map for target-based tasks
 ```
-
 
 [//]: # (Images of the different quad mazes)
 
