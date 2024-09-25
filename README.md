@@ -14,7 +14,12 @@ Kheperax is fully written using [JAX](https://github.com/google/jax), to leverag
 - Customizable maze layouts and target-based tasks
 - Rendering capabilities for visualizing the environment
 
-[//]: # (Add images or animations of the environment)
+<p align="center">
+  <img src="img/gif/mapelites_progress_standard.gif" width="150" />
+  <img src="img/gif/target_policy_snake.gif" width="150" />
+  <img src="img/gif/unstructured_progress_snake.gif" width="150" />
+  <img src="img/gif/target_policy_standard.gif" width="150" />
+</p>
 
 ## Installation
 
