@@ -1,5 +1,6 @@
-brax==0.0.15
-flax==0.6.0
-jax>=0.3.17
-jaxlib>=0.3.15
-qdax==0.2.3
+flax==0.8.5
+imageio==2.35.1
+jax==0.4.30
+jaxlib==0.4.30
+qdax==0.4.0
+tqdm==4.66.5
