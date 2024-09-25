@@ -42,3 +42,7 @@ cuda12 = ["jax[cuda12]>=0.4.30"]
 
 [tool.setuptools.dynamic]
 version = {attr = "kheperax.__version__"}
+
+[tool.setuptools.packages.find]
+include = ["kheperax", "kheperax.*"]
+exclude = ["img", "output"]
