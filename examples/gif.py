@@ -44,7 +44,7 @@ def example_usage_gif(map_name: str = "standard") -> None:
     base_image = env.create_image(state)
 
     episode_length = config_kheperax.episode_length
-    # episode_length = 10  # debug
+
     for _ in tqdm(range(episode_length)):
         # Render
         image = env.add_robot(base_image, state)

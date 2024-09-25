@@ -215,7 +215,10 @@ maze_map = KheperaxConfig.get_default_for_map("standard")  # or "pointmaze", "sn
 target_maze_map = TargetKheperaxConfig.get_default_for_map("standard")  # or "pointmaze", "snake"
 ```
 
-[//]: # (Images of the different maze maps)
+|           |                            Standard                             |                            PointMaze                             |                            Snake                             |
+|:---------:|:---------------------------------------------------------------:|:----------------------------------------------------------------:|:------------------------------------------------------------:|
+| No target | <img src="img/maps/no_target/no_quad/standard.png" width="150"> | <img src="img/maps/no_target/no_quad/pointmaze.png" width="150"> | <img src="img/maps/no_target/no_quad/snake.png" width="150"> |
+|  Target   |  <img src="img/maps/target/no_quad/standard.png" width="150">   |  <img src="img/maps/target/no_quad/pointmaze.png" width="150">   |  <img src="img/maps/target/no_quad/snake.png" width="150">   |
 
 ### Quad Mazes
 - **File**: `kheperax/tasks/quad.py`
@@ -238,7 +241,11 @@ target_maze_map = TargetKheperaxConfig.get_default_for_map("standard")  # or "po
 quad_config = make_quad_config(maze_map)  # or target_maze_map for target-based tasks
 ```
 
-[//]: # (Images of the different quad mazes)
+|           |                        Quad Standard                         |                        Quad PointMaze                         |                        Quad Snake                         |
+|:---------:|:------------------------------------------------------------:|:-------------------------------------------------------------:|:---------------------------------------------------------:|
+| No target | <img src="img/maps/no_target/quad/standard.png" width="150"> | <img src="img/maps/no_target/quad/pointmaze.png" width="150"> | <img src="img/maps/no_target/quad/snake.png" width="150"> |
+|  Target   |  <img src="img/maps/target/quad/standard.png" width="150">   |  <img src="img/maps/target/quad/pointmaze.png" width="150">   |  <img src="img/maps/target/quad/snake.png" width="150">   |
+
 
 ## Advanced Usage
 

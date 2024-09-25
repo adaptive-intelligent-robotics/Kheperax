@@ -5,13 +5,13 @@ from kheperax.simu.geoms import Pos, Segment
 
 
 @dataclasses.dataclass
-class TargetMazeMap:
+class MazeMap:
     segments: list
     target_pos: tuple
     target_radius: float
 
 
-TARGET_KHEPERAX_MAZES = {}
+KHEPERAX_MAZES = {}
 
 
 def register_target_maze(
@@ -20,11 +20,11 @@ def register_target_maze(
     target_pos: Tuple[float, float],
     target_radius: float,
 ) -> None:
-    TARGET_KHEPERAX_MAZES[name] = TargetMazeMap(segments, target_pos, target_radius)
+    KHEPERAX_MAZES[name] = MazeMap(segments, target_pos, target_radius)
 
 
-def get_target_maze_map(name: str) -> TargetMazeMap:
-    return TARGET_KHEPERAX_MAZES[name]
+def get_target_maze_map(name: str) -> MazeMap:
+    return KHEPERAX_MAZES[name]
 
 
 # Standard Kheperax maze

@@ -4,7 +4,7 @@ from typing import List, TypeVar
 import jax
 import jax.numpy as jnp
 
-from kheperax.envs.maze_maps import TargetMazeMap
+from kheperax.envs.maze_maps import MazeMap
 from kheperax.simu.geoms import Pos, Segment
 from kheperax.simu.maze import Maze
 from kheperax.simu.posture import Posture
@@ -26,7 +26,7 @@ def flip_segment(segment: Segment, flip_x: bool, flip_y: bool) -> Segment:
     return Segment(p1, p2)
 
 
-def flip_map(maze_map: TargetMazeMap, flip_x: bool, flip_y: bool) -> List[Segment]:
+def flip_map(maze_map: MazeMap, flip_x: bool, flip_y: bool) -> List[Segment]:
     base_segments = maze_map.segments
     segments = [flip_segment(s, flip_x=flip_x, flip_y=flip_y) for s in base_segments]
     return segments
