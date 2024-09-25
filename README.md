@@ -215,7 +215,7 @@ target_task = TargetKheperaxTask(target_config)
 #### Key Features:
 - **Reward Function**:
    - At each step, the reward is -1, except for the final step, where the reward is 100 * the negative distance to the target center.
-   - This encourages the robot to move towards the target.
+   - This encourages the robot to move towards the target as quickly as possible.
 -  **Episode Termination**:
    - The episode ends when the robot reaches the target (enters the target radius).
    - Also terminates if the maximum number of steps is reached.
@@ -274,41 +274,6 @@ quad_config = make_quad_config(maze_map)  # or target_maze_map for target-based 
 | No target | <img src="img/maps/no_target/quad/standard.png" width="150"> | <img src="img/maps/no_target/quad/pointmaze.png" width="150"> | <img src="img/maps/no_target/quad/snake.png" width="150"> |
 |  Target   |  <img src="img/maps/target/quad/standard.png" width="150">   |  <img src="img/maps/target/quad/pointmaze.png" width="150">   |  <img src="img/maps/target/quad/snake.png" width="150">   |
 
-
-## Advanced Usage
-
-### Target-based Tasks
-
-Use `TargetKheperaxTask` for scenarios with a target position:
-
-```python
-from kheperax.tasks.target import TargetKheperaxConfig
-
-target_config = TargetKheperaxConfig.get_default()
-```
-
-This setup includes:
-- A target position (default: `(0.15, 0.9)`)
-- Target radius (default: `0.05`)
-- Reward based on distance to target
-- Episode termination upon reaching the target
-
-### Quad Mazes
-
-To create a quad maze configuration:
-
-```python
-from kheperax.tasks.quad import make_quad_config
-from kheperax.tasks.target import TargetKheperaxConfig
-
-# Start with a base configuration
-base_config = TargetKheperaxConfig.get_default()
-
-# Create a quad maze configuration
-quad_config = make_quad_config(base_config)
-```
-
-Quad mazes expand the original maze into four quadrants, providing a more complex environment for the robot to navigate. The `make_quad_config` function takes an existing configuration and transforms it into a quad maze configuration.
 
 ## Contributing
 
