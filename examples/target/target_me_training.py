@@ -27,8 +27,8 @@ warnings.simplefilter(action="ignore", category=FutureWarning)
 def run_me(map_name: str = "standard") -> None:
     print(f"Running MAP-Elites on {map_name} with target")
     seed = 42
-    batch_size = 128
-    num_evaluations = int(5e4)
+    batch_size = 2048
+    num_evaluations = int(1e6)
     num_iterations = num_evaluations // batch_size
     grid_shape = (50, 50)
     mlp_policy_hidden_layer_sizes = (8,)
